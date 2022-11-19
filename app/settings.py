@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'team.apps.TeamConfig',
     'user_organization.apps.UserOrganizationConfig',
     'task.apps.TaskConfig',
+    'organization.apps.OrganizationConfig',
 ]
 
 MIDDLEWARE = [
