@@ -12,6 +12,13 @@ def organizations_normalizer(data):
             'description': organization['description'],
             'created_at': organization['created_at'],
             'updated_at': organization['updated_at'],
+<<<<<<< HEAD
+=======
+            # 'role': {
+            #     'id': organization_details.role.id,
+            #     'label': organization_details.role.label,
+            # } if organization_details.role else 'null',
+>>>>>>> a497459 (feat: add organization first steps)
         }
 
         result.append(item)
