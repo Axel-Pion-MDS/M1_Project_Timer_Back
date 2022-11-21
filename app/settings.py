@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'organization.apps.OrganizationConfig',
     'task.apps.TaskConfig',
     'role.apps.RoleConfig',
+    'user.apps.UserConfig'
 ]
 
 MIDDLEWARE = [
