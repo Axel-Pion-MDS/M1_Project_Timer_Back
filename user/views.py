@@ -173,6 +173,46 @@ def update_user(request, user_id):
 
 
 @csrf_exempt
+def update_user(request, user_id):
+    if request.method == 'PATCH':
+        decode = request.body.decode('utf-8')
+        content = json.loads(decode)
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'User not found.'
+            })
+
+        form = UserForm(instance=user, data=content)
+
+        if form.is_valid():
+            update_user = form.save(commit=False)
+            update_user.password = pbkdf2_sha256.hash(update_user.password)
+            update_user.save()
+        else:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'Could not save the data',
+                'data': form.errors
+            })
+
+    else:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'Not Allowed',
+            'message': 'Must be a PATCH method',
+        })
+
+    data = user_normalizer(user)
+
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
+
+@csrf_exempt
 def delete_user(request, user_id):
     if request.method == 'DELETE':
         try:
