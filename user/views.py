@@ -6,7 +6,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from .models import User
 from .normalizers import user_normalizer, users_normalizer
-from .forms import RegisterForm, LoginForm
+from .forms import UserForm, LoginForm
 from passlib.hash import pbkdf2_sha256
 
 ROLE_USER = 1
@@ -97,7 +97,7 @@ def register(request):
     if request.method == "POST":
         decode = request.body.decode('utf-8')
         content = json.loads(decode)
-        form = RegisterForm(content)
+        form = UserForm(content)
 
         if form.is_valid():
             email = content['email']
@@ -126,6 +126,46 @@ def register(request):
             'result': 'Not Allowed',
             'message': 'Must be a POST method',
         })
+
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
+
+@csrf_exempt
+def update_user(request, user_id):
+    if request.method == 'PATCH':
+        decode = request.body.decode('utf-8')
+        content = json.loads(decode)
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'User not found.'
+            })
+
+        form = UserForm(instance=user, data=content)
+
+        if form.is_valid():
+            update_user = form.save(commit=False)
+            update_user.password = pbkdf2_sha256.hash(update_user.password)
+            update_user.save()
+        else:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'Could not save the data',
+                'data': form.errors
+            })
+
+    else:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'Not Allowed',
+            'message': 'Must be a PATCH method',
+        })
+
+    data = user_normalizer(user)
 
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
 
