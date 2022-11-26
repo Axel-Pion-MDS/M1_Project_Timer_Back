@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'role.apps.RoleConfig',
     'organization.apps.OrganizationConfig',
 ]
 
@@ -141,4 +142,15 @@ HTTP_CONSTANTS = {
     'NOT_FOUND': 404,
     'NOT_ALLOWED': 405,
     'INTERNAL_SERVER_ERROR': 500,
+}
+
+ROLES = {
+    'ROLE_USER': 1,
+    'ROLE_ADMIN': 2,
+    'ROLE_SUPER_ADMIN': 3,
+    'ROLE_ORGANIZATION_OWNER': 4,
+    'ROLE_ORGANIZATION_CO_OWNER': 5,
+    'ROLE_ORGANIZATION_MEMBER': 6,
+    'ROLE_TEAM_LEADER': 7,
+    'ROLE_TEAM_MEMBER': 8,
 }
