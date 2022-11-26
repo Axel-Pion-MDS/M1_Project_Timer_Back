@@ -10,7 +10,6 @@ def users_normalizer(data):
             'firstname': user['firstname'],
             'lastname': user['lastname'],
             'email': user['email'],
-            'password': user['password'],
             'created_at': user['created_at'],
             'updated_at': user['updated_at'],
         }
@@ -26,7 +25,6 @@ def user_normalizer(data):
         'firstname': data.firstname,
         'lastname': data.lastname,
         'email': data.email,
-        'password': data.password,
         'created_at': data.created_at,
         'updated_at': data.updated_at,
     }
