@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'user_task.apps.UserTaskConfig',
     'project.apps.ProjectConfig'
     'task.apps.TaskConfig',
+    'role.apps.RoleConfig',
     'organization.apps.OrganizationConfig',
 ]
 
