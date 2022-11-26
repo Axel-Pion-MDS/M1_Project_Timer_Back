@@ -9,7 +9,7 @@ class User(models.Model):
     created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, auto_now_add=False)
     role = models.IntegerField()
-    # role = models.ForeignKey('role.role', on_delete=models.CASCADE, null=False)
+    # role = models.ForeignKey('role.role', on_delete=models.CASCADE, null=False, **default=settings.ROLE_CONSTANTS['ROLE_USER']**)
 
     def __str__(self):
         return '{}. {} {} - with the email: {}, created on {}, updated on {}'.format(self.pk, self.firstname, self.lastname, self.email, self.created_at, self.updated_at)
