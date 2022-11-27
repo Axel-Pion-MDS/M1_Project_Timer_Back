@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'organization.apps.OrganizationConfig',
     'role.apps.RoleConfig',
     'user.apps.UserConfig',
+    'team.apps.TeamConfig',
     'user_organization.apps.UserOrganizationConfig',
 ]
 
