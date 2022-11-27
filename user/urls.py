@@ -8,5 +8,5 @@ urlpatterns = [
     path('<int:user_id>', views.get_user, name='get_user'),
     path('login', views.login, name='login'),
     path('delete/<int:user_id>', views.delete_user , name='delete_user'),
-    path('update/<int:user_id>', views.update_user , name='update_user')
+    path('update', views.update_user , name='update_user')
 ]

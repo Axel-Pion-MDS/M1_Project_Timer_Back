@@ -1,5 +1,6 @@
 import django.middleware.csrf
 import json
+import jwt
 
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
@@ -8,6 +9,11 @@ from .models import User
 from .normalizers import user_normalizer, users_normalizer
 from .forms import UserForm, LoginForm
 from passlib.hash import pbkdf2_sha256
+from environs import Env
+
+env = Env()
+env.read_env()
+TOKEN_KEY = env("JWT_TOKEN_KEY")
 
 
 # @csrf_protect
@@ -50,7 +56,10 @@ def login(request):
             'result': 'Not Allowed',
             'message': 'Must be a POST method',
         })
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'message': message})
+    # Change key
+    key = TOKEN_KEY
+    token = jwt.encode({"id": user.id}, key, algorithm="HS256" )
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'token': token})
 
 
 @csrf_exempt
@@ -107,7 +116,6 @@ def register(request):
                 new_user = form.save(commit=False)
                 new_user.password = pbkdf2_sha256.hash(new_user.password)
                 new_user.save()
-                data = user_normalizer(User.objects.latest('id'))
             else:
                 return JsonResponse({
                     'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
@@ -127,15 +135,18 @@ def register(request):
             'result': 'Not Allowed',
             'message': 'Must be a POST method',
         })
-
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
+    # Change key
+    key = TOKEN_KEY
+    token = jwt.encode({"id": new_user.id}, key, algorithm="HS256" )
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'token': token})
 
 
 @csrf_exempt
-def update_user(request, user_id):
+def update_user(request):
     if request.method == 'PATCH':
         decode = request.body.decode('utf-8')
         content = json.loads(decode)
+        user_id = content['id']
 
         try:
             user = User.objects.get(pk=user_id)
