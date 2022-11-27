@@ -38,5 +38,8 @@ services:
       - "5050:80"
     depends_on:
       - postgres-db
+    volumes:
+      - my-data:/var/lib/pgadmin
 volumes:
   postgres:
+  my-data:
