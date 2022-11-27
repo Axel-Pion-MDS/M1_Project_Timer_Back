@@ -18,7 +18,7 @@ class Team(models.Model):
 
     def get_users(self):
         return [user_team 
-            for user_team in UserTeam.objects.filter(team=self).all()]
+                for user_team in UserTeam.objects.filter(team=self).all()]
 
 
 class UserTeam(models.Model):
