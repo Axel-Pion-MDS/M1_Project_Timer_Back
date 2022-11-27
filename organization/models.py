@@ -11,17 +11,3 @@ class Organization(models.Model):
 
     def __str__(self):
         return '{}. {} - created on {}, updated on {}'.format(self.pk, self.label, self.created_at, self.updated_at)
-
-
-class UserOrganization(models.Model):
-    organization = models.ForeignKey('organization.organization', on_delete=models.CASCADE, null=False)
-    # role = models.ForeignKey('role.role', on_delete=models.CASCADE, null=False)
-    # user = models.ForeignKey('user.user', on_delete=models.CASCADE, null=False)
-
-    def __str__(self):
-        return '{}. {}'.format(
-            self.pk,
-            self.organization,
-            # self.user,
-            # self.role
-        )

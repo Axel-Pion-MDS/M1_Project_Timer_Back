@@ -57,30 +57,33 @@ def add_organization(request):
     if request.method == "POST":
         decode = request.body.decode('utf-8')
         content = json.loads(decode)
-        form = OrganizationForm(content)
+        organization_form = OrganizationForm(content)
 
-        if form.is_valid():
-            form.save()
-            data = organization_normalizer(Organization.objects.latest('id'))
-
-            # if content['role']:
-            #     try:
-            #         santa = Role.objects.get(pk=content['role'])
-            #     except Role.DoesNotExist:
-            #         return JsonResponse({
-            #             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-            #             'result': 'error',
-            #             'message': 'Role not found.'
-            #         })
-            #
-            #     roleOrganization = RoleOrganization(organization=Organization.objects.latest('id'), role=role)
-            #     RoleOrganization.save(roleOrganization)
+        if organization_form.is_valid():
+            organization_form.save()
+            organization_data = Organization.objects.latest('id')
+            organization_id = organization_data.id
+            current_user = request.user
+            role = settings.ROLES['ROLE_ORGANIZATION_OWNER']   
+            
+            user_organization_form = UserOrganizationForm(organization_id, current_user, role)
+            
+            if user_organization_form.is_valid():
+                user_organization_form.save()
+                data = organization_normalizer(organization_data)
+            else:
+                return JsonResponse({
+                    'code': settings.HTTP_CONSTANTS['INTERNAL_SERVER_ERROR'],
+                    'result': 'error',
+                    'message': 'Could not save the data in User Organization',
+                    'data': user_organization_form.errors
+                })
         else:
             return JsonResponse({
                 'code': settings.HTTP_CONSTANTS['INTERNAL_SERVER_ERROR'],
                 'result': 'error',
-                'message': 'Could not save the data',
-                'data': form.errors
+                'message': 'Could not save the data in Organization',
+                'data': organization_form.errors
             })
     else:
         return JsonResponse({
@@ -153,4 +156,3 @@ def delete_organization(request, organization_id):
         })
 
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
-

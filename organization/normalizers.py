@@ -12,10 +12,10 @@ def organizations_normalizer(data):
             'description': organization['description'],
             'created_at': organization['created_at'],
             'updated_at': organization['updated_at'],
-            # 'role': {
-            #     'id': organization_details.role.id,
-            #     'label': organization_details.role.label,
-            # } if organization_details.role else 'null',
+            'role': {
+                'id': organization_details.role.id,
+                'label': organization_details.role.label,
+            } if organization_details.role else 'null',
         }
 
         result.append(item)
@@ -30,8 +30,8 @@ def organization_normalizer(data):
         'description': data.description,
         'created_at': data.created_at,
         'updated_at': data.updated_at,
-        # 'role': {
-        #     'id': data.role.id,
-        #     'label': data.role.label,
-        # } if data.role else 'null',
+        'role': {
+            'id': data.role.id,
+            'label': data.role.label,
+        } if data.role else 'null',
     }
