@@ -9,8 +9,6 @@ from .normalizers import user_normalizer, users_normalizer
 from .forms import UserForm, LoginForm
 from passlib.hash import pbkdf2_sha256
 
-ROLE_USER = 1
-
 # @csrf_protect
 @csrf_exempt
 def login(request):
@@ -104,7 +102,6 @@ def register(request):
             if not User.objects.filter(email=email).exists():
                 new_user = form.save(commit=False)
                 new_user.password = pbkdf2_sha256.hash(new_user.password)
-                new_user.role = ROLE_USER
                 new_user.save()
                 data = user_normalizer(User.objects.latest('id'))
             else:
