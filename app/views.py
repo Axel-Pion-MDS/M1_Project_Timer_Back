@@ -4,6 +4,7 @@ from service.send_response import send_json_response
 from service.verify_method import request_method_is
 from service.errors import Errors
 
+
 @csrf_exempt
 def send_csrf_token(request):
     """Send CSRF token to user
