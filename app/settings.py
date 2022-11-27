@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'task.apps.TaskConfig',
     'organization.apps.OrganizationConfig',
     'role.apps.RoleConfig',
     'user.apps.UserConfig',
@@ -49,7 +48,6 @@ INSTALLED_APPS = [
     'user_task.apps.UserTaskConfig',
     'project.apps.ProjectConfig'
     'task.apps.TaskConfig',
-    'role.apps.RoleConfig',
     'organization.apps.OrganizationConfig',
 ]
 
