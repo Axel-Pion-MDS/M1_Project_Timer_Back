@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,4 +26,5 @@ urlpatterns = [
     path('task/', include('task.urls')),
     path('user/', include('user.urls')),
     path('user-organization/', include('user_organization.urls')),
+    path('token/', views.send_csrf_token, name="send_csrf_token"),
 ]
