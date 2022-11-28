@@ -86,3 +86,19 @@ def update_team(request):
     team_object.save()
     team = team_normalizer(Team.objects.get(pk=team_object.id))
     return send_json_response('SUCCESS', 'success', team)
+
+def delete_team(request, team_id):
+    errors = Errors()
+    
+    # request method must be DELETE type
+    if not request_method_is(request, 'DELETE'):    
+        errors.add(0, 'method', 'Must be a DELETE method')
+        return send_json_response('NOT_ALLOWED', 'Not Allowed', {**errors.get_dict_erros()})
+
+    # check if Team object exists
+    if not Team.objects.filter(pk=team_id).exists():
+        errors.add(0, 'id', 'Team with id: {} not found'.format(team_id))
+        return send_json_response('NOT_FOUND', 'Not Found', {**errors.get_dict_erros()})
+
+    Team.objects.get(pk=team_id).delete()
+    return send_json_response('SUCCESS', 'success', [])
