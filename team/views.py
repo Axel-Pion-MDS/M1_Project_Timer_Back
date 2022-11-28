@@ -55,3 +55,34 @@ def add_team(request):
     team_object = form.save()
     team = team_normalizer(Team.objects.get(pk=team_object.id))
     return send_json_response('SUCCESS', 'success', team)
+
+def update_team(request):
+    errors = Errors()
+    
+    # request method must be PATCH type
+    if not request_method_is(request, 'PATCH'):    
+        errors.add(0, 'method', 'Must be a PATCH method')
+        return send_json_response('NOT_ALLOWED', 'Not Allowed', {**errors.get_dict_erros()})
+
+    content = json.loads(request.body.decode('utf-8'))
+    team_id = content['id']
+
+    # check if Team object exists
+    if not Team.objects.filter(pk=team_id).exists():
+        errors.add(0, 'id', 'Team with id: {} not found'.format(team_id))
+        return send_json_response('NOT_FOUND', 'Not Found', {**errors.get_dict_erros()})
+
+    team_object = Team.objects.get(pk=team_id)
+    form = TeamForm(instance=team_object, data=content)
+
+    # if form is not valid, display form errors
+    if not form.is_valid():
+        # loop and append errors from erros.items()
+        for form_error in list(form.errors.items()):
+            errors.add(0, form_error[0], ', '.join(form_error[1]))
+        return send_json_response('INTERNAL_SERVER_ERROR', 'error', {**errors.get_dict_erros()})
+
+    # save and get team object
+    team_object.save()
+    team = team_normalizer(Team.objects.get(pk=team_object.id))
+    return send_json_response('SUCCESS', 'success', team)
