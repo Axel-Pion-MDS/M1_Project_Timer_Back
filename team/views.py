@@ -6,7 +6,16 @@ from team.normalizers import teams_normalizer, team_normalizer
 from team.models import Team
 from team.forms import TeamForm
 
+
 def get_teams(request):
+    """GET list of informations from teams 
+
+    Args:
+        request (class): Django request Class
+
+    Returns:
+        dict: response with informations from teams
+    """
     errors = Errors()
     
     # request method must be GET type
@@ -17,7 +26,17 @@ def get_teams(request):
     teams = teams_normalizer(Team.objects.all())
     return send_json_response('SUCCESS', 'success', teams)
 
+
 def get_team(request, team_id):
+    """GET informations from a team using its id
+
+    Args:
+        request (class): Django request Class
+        team_id (int): team's id
+
+    Returns:
+        dict: response with team's informations
+    """
     errors = Errors()
     
     # request method must be GET type
@@ -33,7 +52,16 @@ def get_team(request, team_id):
     team = team_normalizer(Team.objects.get(pk=team_id))
     return send_json_response('SUCCESS', 'success', team)
 
+
 def add_team(request):
+    """POST new team
+
+    Args:
+        request (class): Django request Class
+
+    Returns:
+        dict: response with new team's informations
+    """
     errors = Errors()
     
     # request method must be POST type
@@ -56,7 +84,16 @@ def add_team(request):
     team = team_normalizer(Team.objects.get(pk=team_object.id))
     return send_json_response('SUCCESS', 'success', team)
 
+
 def update_team(request):
+    """PATCH team informations with the id in the body
+
+    Args:
+        request (class): Django request Class
+
+    Returns:
+        dict: response with new team's informations
+    """
     errors = Errors()
     
     # request method must be PATCH type
@@ -87,7 +124,17 @@ def update_team(request):
     team = team_normalizer(Team.objects.get(pk=team_object.id))
     return send_json_response('SUCCESS', 'success', team)
 
+
 def delete_team(request, team_id):
+    """DELETE a team using the id
+
+    Args:
+        request (class): Django request class
+        team_id (int): team's id
+
+    Returns:
+        json: response
+    """
     errors = Errors()
     
     # request method must be DELETE type
