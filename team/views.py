@@ -5,7 +5,7 @@ from services.send_response import send_json_response
 from team.normalizers import teams_normalizer, team_normalizer
 from team.models import Team
 from team.forms import TeamForm
-
+from role.models import Role
 
 def get_teams(request):
     """GET list of informations from teams 
