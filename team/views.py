@@ -202,7 +202,64 @@ def add_user_team(request):
             errors.add(0, form_error[0], ', '.join(form_error[1]))
         return send_json_response('INTERNAL_SERVER_ERROR', 'error', {**errors.get_dict_erros()})
 
-    # save and get team object
+    # save and get user_team object
     user_team_object = form.save()
     user_team = user_team_normalizer(UserTeam.objects.get(pk=user_team_object.id))
     return send_json_response('SUCCESS', 'success', user_team)
+
+
+def update_user_team(request):
+    errors = Errors()
+    
+    # request method must be PATCH type
+    if not request_method_is(request, 'PATCH'):    
+        errors.add(0, 'method', 'Must be a PATCH method')
+        return send_json_response('NOT_ALLOWED', 'Not Allowed', {**errors.get_dict_erros()})
+
+    content = json.loads(request.body.decode('utf-8'))
+    team_id = content['team_id']
+    user_id = content['user_id']
+    role_id = content['role_id']
+
+    # check if Team object exists
+    if not Team.objects.filter(pk=team_id).exists():
+        errors.add(0, 'team_id', 'Team with id: {} not found'.format(team_id))
+    # check if User object exists
+    if not User.objects.filter(pk=user_id).exists():
+        errors.add(0, 'user_id', 'User with id: {} not found'.format(user_id))
+    # check if Role object exists
+    if not Role.objects.filter(pk=role_id).exists():
+        errors.add(0, 'role_id', 'Role with id: {} not found'.format(role_id))
+    
+    # if Error has errors return response with all errors 
+    if errors.has_errors():
+        return send_json_response('NOT_FOUND', 'Not Found', {**errors.get_dict_erros()})
+    
+    # retrieve Team, User and Role
+    team = Team.objects.get(pk=team_id)
+    user = User.objects.get(pk=user_id)
+    role = Role.objects.get(pk=role_id)
+
+    # check if UserTeam object exists
+    if not UserTeam.objects.filter(user=user, team=team).exists():
+        errors.add(0, 'user', 'This user not found in this team')
+        return send_json_response('NOT_FOUND', 'Not Found', {**errors.get_dict_erros()}) 
+     
+    user_team_object = UserTeam.objects.get(user=user, team=team)
+    form = UserTeamForm(instance=user_team_object, data={
+        'team': team,
+        'user': user,
+        'role': role
+    })
+
+    # if form is not valid, display form errors
+    if not form.is_valid():
+        # loop and append errors from erros.items()
+        for form_error in list(form.errors.items()):
+            errors.add(0, form_error[0], ', '.join(form_error[1]))
+        return send_json_response('INTERNAL_SERVER_ERROR', 'error', {**errors.get_dict_erros()})
+    
+    # save and get user_team object
+    user_team_object.save()
+    user_team = user_team_normalizer(UserTeam.objects.get(pk=user_team_object.id))
+    return send_json_response('SUCCESS', 'success', user_team)    
