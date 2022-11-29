@@ -217,16 +217,9 @@ def update_user_team(request):
         return send_json_response('NOT_ALLOWED', 'Not Allowed', {**errors.get_dict_erros()})
 
     content = json.loads(request.body.decode('utf-8'))
-    team_id = content['team_id']
-    user_id = content['user_id']
+    user_team_id = content['id']
     role_id = content['role_id']
 
-    # check if Team object exists
-    if not Team.objects.filter(pk=team_id).exists():
-        errors.add(0, 'team_id', 'Team with id: {} not found'.format(team_id))
-    # check if User object exists
-    if not User.objects.filter(pk=user_id).exists():
-        errors.add(0, 'user_id', 'User with id: {} not found'.format(user_id))
     # check if Role object exists
     if not Role.objects.filter(pk=role_id).exists():
         errors.add(0, 'role_id', 'Role with id: {} not found'.format(role_id))
@@ -235,20 +228,16 @@ def update_user_team(request):
     if errors.has_errors():
         return send_json_response('NOT_FOUND', 'Not Found', {**errors.get_dict_erros()})
     
-    # retrieve Team, User and Role
-    team = Team.objects.get(pk=team_id)
-    user = User.objects.get(pk=user_id)
-    role = Role.objects.get(pk=role_id)
-
     # check if UserTeam object exists
-    if not UserTeam.objects.filter(user=user, team=team).exists():
-        errors.add(0, 'user', 'This user not found in this team')
-        return send_json_response('NOT_FOUND', 'Not Found', {**errors.get_dict_erros()}) 
-     
-    user_team_object = UserTeam.objects.get(user=user, team=team)
+    if not UserTeam.objects.filter(pk=user_team_id).exists():
+        errors.add(0, 'id', 'This user not found in this team')
+        return send_json_response('NOT_FOUND', 'Not Found', {**errors.get_dict_erros()})
+    
+    role = Role.objects.get(pk=role_id)
+    user_team_object = UserTeam.objects.get(pk=user_team_id)
     form = UserTeamForm(instance=user_team_object, data={
-        'team': team,
-        'user': user,
+        'team': user_team_object.team,
+        'user': user_team_object.user,
         'role': role
     })
 
