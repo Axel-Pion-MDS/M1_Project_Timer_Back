@@ -60,6 +60,10 @@ def add_team(request):
     Args:
         request (class): Django request Class
 
+    Request body content: 
+        label (str): Its label.
+        description (str): Its description.
+
     Returns:
         dict: response with new team's informations
     """
@@ -91,6 +95,11 @@ def update_team(request):
 
     Args:
         request (class): Django request Class
+
+    Request body content: 
+        id (int): The id of team. Team object with this id must be exists.
+        label (str): Its label.
+        description (str): Its description.
 
     Returns:
         dict: response with new team's informations
@@ -153,6 +162,19 @@ def delete_team(request, team_id):
 
 
 def add_user_team(request):
+    """Add user inside a team
+
+    Args:
+        request (class): Django request class
+
+    Request body content: 
+        team_id (int): The id of team. Team object with this id must be exists.
+        user_id (int): The id of user. User object with this id must be exists.
+        role_id (int): The id of role. Role object with this id must be exists.
+
+    Returns:
+        json: response
+    """
     errors = Errors()
     
     # request method must be POST type
@@ -209,6 +231,18 @@ def add_user_team(request):
 
 
 def update_user_team(request):
+    """Update user inside a team
+
+    Args:
+        request (class): Django request class
+
+    Request body content: 
+        id (int): The id of user inside team. UserTeam object with this id must be exists.
+        role_id (int): The id of role. Role object with this id must be exists.
+
+    Returns:
+        json: response
+    """
     errors = Errors()
     
     # request method must be PATCH type
@@ -255,6 +289,15 @@ def update_user_team(request):
 
 
 def delete_user_team(request, user_team_id):
+    """DELETE user inside a team using the id
+
+    Args:
+        request (class): Django request class
+        user_team_id (int): userteam's id
+
+    Returns:
+        json: response
+    """
     errors = Errors()
     
     # request method must be DELETE type
