@@ -9,13 +9,15 @@ class UserOrganization(models.Model):
         'role.Role',
         on_delete=models.CASCADE,
         null=False,
-        default=settings.ROLES['ROLE_ORGANIZATION_OWNER']
+        blank=True,
+        default=settings.ROLES['ROLE_ORGANIZATION_MEMBER']
     )
 
     def __str__(self):
-        return '{}. {}'.format(
+        return '{}. {} - {} / {} ({})'.format(
             self.pk,
-            self.organization,
-            self.user,
-            self.role
+            self.organization.id,
+            self.organization.label,
+            self.user.email,
+            self.role.label
         )

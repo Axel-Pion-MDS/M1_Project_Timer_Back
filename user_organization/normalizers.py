@@ -31,7 +31,7 @@ def user_organizations_normalizer(data):
 
 def user_organization_normalizer(data):
     return {
-        'id': data['id'],
+        'id': data.id,
         'organization': {
             'id': data.organization.id,
             'label': data.organization.label,
@@ -47,3 +47,33 @@ def user_organization_normalizer(data):
             'label': data.role.label,
         },
     }
+
+
+def users_from_organization_normalizer(data, organization):
+    result = [{
+        'organization': {
+            'id': organization.id,
+            'label': organization.label,
+        }
+    }]
+
+    items = []
+    for user in data:
+        items.append({
+            'user': {
+                'id': user.user.id,
+                'firstname': user.user.firstname,
+                'lastname': user.user.lastname,
+                'email': user.user.email,
+            },
+            'role': {
+                'id': user.role.id,
+                'label': user.role.label,
+            },
+        })
+
+    result.append({
+        'users': items
+    })
+
+    return result

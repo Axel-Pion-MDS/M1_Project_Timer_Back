@@ -24,5 +24,5 @@ urlpatterns = [
     path('role/', include('role.urls')),
     path('task/', include('task.urls')),
     path('user/', include('user.urls')),
-    path('user-organization/', include('user.urls')),
+    path('user-organization/', include('user_organization.urls')),
 ]
