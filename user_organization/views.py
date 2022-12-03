@@ -190,7 +190,7 @@ def add_user_to_organization(request):
 
 
 @csrf_exempt
-def update_user_from_organization(request):
+def update_user_role_from_organization(request):
     if request.method == 'PATCH':
         body = request.body.decode('utf-8')
         content = json.loads(body)
