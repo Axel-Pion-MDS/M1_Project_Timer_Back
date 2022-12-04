@@ -1,12 +1,17 @@
 import django.middleware.csrf
 import json
+import jwt
 
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
+
+from user.models import User
+from user_organization.forms import UserOrganizationForm
 from .models import Organization
 from .normalizers import organization_normalizer, organizations_normalizer
 from .forms import OrganizationForm
+from service import tokenDecode
 
 
 # @csrf_protect
@@ -51,7 +56,6 @@ def get_organization(request, organization_id):
 
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
 
-
 @csrf_exempt
 def add_organization(request):
     if request.method == "POST":
@@ -62,11 +66,25 @@ def add_organization(request):
         if organization_form.is_valid():
             organization_form.save()
             organization_data = Organization.objects.latest('id')
-            organization_id = organization_data.id
-            current_user = request.user
-            role = settings.ROLES['ROLE_ORGANIZATION_OWNER']   
-            
-            user_organization_form = UserOrganizationForm(organization_id, current_user, role)
+
+            authorization = request.headers.get('Authorization')
+            jwt_content = tokenDecode.decode_token(authorization)
+            user = User.objects.get(pk=jwt_content.get('id'))
+
+            if not user:
+                return JsonResponse({
+                    'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                    'result': 'error',
+                    'message': 'User not found.'
+                })
+
+            user_organization = {
+                'organization': organization_data.id,
+                'user': user,
+                'role': settings.ROLES['ROLE_ORGANIZATION_OWNER'],
+            }
+
+            user_organization_form = UserOrganizationForm(user_organization)
             
             if user_organization_form.is_valid():
                 user_organization_form.save()
