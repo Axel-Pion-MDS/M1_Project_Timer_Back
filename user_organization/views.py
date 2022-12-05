@@ -123,7 +123,7 @@ def add_user_to_organization(request):
                 return JsonResponse({
                     'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
                     'result': 'error',
-                    'message': 'You do not have the right access for this resource.'
+                    'message': 'You do not have the right privileges to access this resource.'
                 })
         except UserOrganization.DoesNotExist:
             return JsonResponse({
@@ -223,7 +223,7 @@ def update_user_role_from_organization(request):
                 return JsonResponse({
                     'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
                     'result': 'error',
-                    'message': 'You do not have the right access for this resource.'
+                    'message': 'You do not have the right privileges to access this resource.'
                 })
         except UserOrganization.DoesNotExist:
             return JsonResponse({
@@ -335,7 +335,7 @@ def delete_user_from_organization(request):
                 return JsonResponse({
                     'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
                     'result': 'error',
-                    'message': 'You do not have the right access for this resource.'
+                    'message': 'You do not have the right privileges to access this resource.'
                 })
         except UserOrganization.DoesNotExist:
             return JsonResponse({
@@ -374,7 +374,7 @@ def delete_user_from_organization(request):
             return JsonResponse({
                 'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
                 'result': 'error',
-                'message': 'You do not have the right access to delete this user.'
+                'message': 'You do not have the right privileges to access this resource.'
             })
 
         if (user_to_delete.role.id == settings.ROLES['ROLE_ORGANIZATION_MEMBER'] and
@@ -382,7 +382,7 @@ def delete_user_from_organization(request):
             return JsonResponse({
                 'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
                 'result': 'error',
-                'message': 'You do not have the right access to delete this user.'
+                'message': 'You do not have the right privileges to access this resource.'
             })
 
         if (user_to_delete.role.id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] and

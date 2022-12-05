@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
 from user.models import User
 from user_organization.forms import UserOrganizationForm
+from user_organization.models import UserOrganization
 from .models import Organization
 from .normalizers import organization_normalizer, organizations_normalizer
 from .forms import OrganizationForm
@@ -56,6 +57,7 @@ def get_organization(request, organization_id):
 
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
 
+
 @csrf_exempt
 def add_organization(request):
     if request.method == "POST":
@@ -69,9 +71,10 @@ def add_organization(request):
 
             authorization = request.headers.get('Authorization')
             jwt_content = tokenDecode.decode_token(authorization)
-            user = User.objects.get(pk=jwt_content.get('id'))
 
-            if not user:
+            try:
+                user = User.objects.get(pk=jwt_content.get('id'))
+            except User.DoesNotExist:
                 return JsonResponse({
                     'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
                     'result': 'error',
@@ -85,7 +88,7 @@ def add_organization(request):
             }
 
             user_organization_form = UserOrganizationForm(user_organization)
-            
+
             if user_organization_form.is_valid():
                 user_organization_form.save()
                 data = organization_normalizer(organization_data)
@@ -118,7 +121,19 @@ def update_organization(request):
     if request.method == 'PATCH':
         decode = request.body.decode('utf-8')
         content = json.loads(decode)
-        organization_id = content['id']
+        organization_id = content['organization']
+
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+
+        try:
+            user = User.objects.get(pk=jwt_content.get('id'))
+        except User.DoesNotExist:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'User not found.'
+            })
 
         try:
             organization = Organization.objects.get(pk=organization_id)
@@ -127,6 +142,22 @@ def update_organization(request):
                 'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
                 'result': 'error',
                 'message': 'Organization not found.'
+            })
+
+        try:
+            user_organization = UserOrganization.objects.get(user=user, organization=organization)
+            if not (user_organization.role_id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] or
+                    user_organization.role_id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER']):
+                return JsonResponse({
+                    'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                    'result': 'error',
+                    'message': 'You do not have the right privileges to access this resource.'
+                })
+        except UserOrganization.DoesNotExist:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'This user is not from this Organization.'
             })
 
         form = OrganizationForm(instance=organization, data=content)
@@ -156,6 +187,18 @@ def update_organization(request):
 @csrf_exempt
 def delete_organization(request, organization_id):
     if request.method == 'DELETE':
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+
+        try:
+            user = User.objects.get(pk=jwt_content.get('id'))
+        except User.DoesNotExist:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'User not found.'
+            })
+
         try:
             organization = Organization.objects.get(pk=organization_id)
         except Organization.DoesNotExist:
@@ -163,6 +206,22 @@ def delete_organization(request, organization_id):
                 'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
                 'result': 'error',
                 'message': 'Organization not found.'
+            })
+
+        try:
+            user_organization = UserOrganization.objects.get(user=user, organization=organization)
+
+            if user_organization.role_id != settings.ROLES['ROLE_ORGANIZATION_OWNER']:
+                return JsonResponse({
+                    'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                    'result': 'error',
+                    'message': 'You do not have the right privileges to access this resource.'
+                })
+        except UserOrganization.DoesNotExist:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'This user is not from this Organization.'
             })
 
         organization.delete()
