@@ -22,4 +22,5 @@ urlpatterns = [
     path('role/', include('role.urls')),
     path('user/', include('user.urls')),
     path('user-organization/', include('user_organization.urls')),
+    path('token/', views.send_csrf_token, name="send_csrf_token"),
 ]
