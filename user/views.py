@@ -9,6 +9,7 @@ from .normalizers import user_normalizer, users_normalizer
 from .forms import UserForm, LoginForm
 from passlib.hash import pbkdf2_sha256
 
+
 # @csrf_protect
 @csrf_exempt
 def login(request):
@@ -51,6 +52,7 @@ def login(request):
         })
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'message': message})
 
+
 @csrf_exempt
 def get_users(request):
     if request.method == 'GET':
@@ -67,6 +69,7 @@ def get_users(request):
         })
 
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
+
 
 @csrf_exempt
 def get_user(request, user_id):
@@ -89,6 +92,7 @@ def get_user(request, user_id):
         })
 
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
+
 
 @csrf_exempt
 def register(request):
@@ -125,6 +129,7 @@ def register(request):
         })
 
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
+
 
 @csrf_exempt
 def update_user(request, user_id):
@@ -165,6 +170,7 @@ def update_user(request, user_id):
     data = user_normalizer(user)
 
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
+
 
 @csrf_exempt
 def delete_user(request, user_id):
