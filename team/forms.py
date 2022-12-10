@@ -7,8 +7,8 @@ class TeamForm(forms.ModelForm):
         model = Team
         fields = (
             'label',
-            'description'
-            # 'organization'
+            'description',
+            'organization'
         )
 
 class UserTeamForm(forms.ModelForm):

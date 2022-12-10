@@ -7,13 +7,13 @@ class Team(models.Model):
     description = models.CharField(max_length=512, default='')
     created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, auto_now_add=False)
-    # organization = models.ForeignKey('organization.Organization', on_delete=models.PROTECT, null=True)
+    organization = models.ForeignKey('organization.Organization', on_delete=models.PROTECT, null=True, default=None)
 
     def __str__(self):
         return '{}. {} from organization {}'.format(
             self.id,
             self.label,
-            '' #self.organization.label
+            self.organization
         )
 
     def get_users(self):
