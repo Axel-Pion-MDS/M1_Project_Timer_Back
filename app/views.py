@@ -1,8 +1,8 @@
 from django.middleware import csrf
 from django.views.decorators.csrf import csrf_exempt
-from services.send_response import send_json_response
-from services.verify_method import request_method_is
-from services.errors import Errors
+from service.send_response import send_json_response
+from service.verify_method import request_method_is
+from service.errors import Errors
 
 @csrf_exempt
 def send_csrf_token(request):
