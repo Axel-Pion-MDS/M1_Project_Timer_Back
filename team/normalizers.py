@@ -28,7 +28,10 @@ def teams_normalizer(data):
         'id': team.id,
         'label': team.label,
         'description': team.description,
-        # 'organization': team.organization.id,
+        'organization': {
+            'id': team.organization.id,
+            'label': team.organization.label
+        },
         'users': users_teams_normalizer(team.get_users()),
         'created_at': team.created_at,
         'updated_at': team.updated_at
@@ -40,7 +43,10 @@ def team_normalizer(data):
         'id': data.id,
         'label': data.label,
         'description': data.description,
-        # 'organization': team.organization.id,
+        'organization': {
+            'id': data.organization.id,
+            'label': data.organization.label
+        },
         'users': users_teams_normalizer(data.get_users()),
         'created_at': data.created_at,
         'updated_at': data.updated_at

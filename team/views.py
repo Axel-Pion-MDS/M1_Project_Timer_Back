@@ -6,6 +6,7 @@ from team.normalizers import teams_normalizer, team_normalizer, user_team_normal
 from team.models import Team, UserTeam
 from team.forms import TeamForm, UserTeamForm
 from role.models import Role
+from organization.models import Organization
 from user.models import User
 
 def get_teams(request):
@@ -18,7 +19,7 @@ def get_teams(request):
         dict: response with informations from teams
     """
     errors = Errors()
-    
+     
     # request method must be GET type
     if not request_method_is(request, 'GET'):    
         errors.add(0, 'method', 'Must be a GET method')
@@ -75,6 +76,13 @@ def add_team(request):
         return send_json_response('NOT_ALLOWED', 'Not Allowed', {**errors.get_dict_erros()})
 
     content = json.loads(request.body.decode('utf-8'))
+    
+    # check if Organizaton object exists
+    if not 'organization' in content or not Organization.objects.filter(id=content['organization']).exists():
+        errors.add(0, 'organization', 'Organization not found')
+        return send_json_response('INTERNAL_SERVER_ERROR', 'error', {**errors.get_dict_erros()})
+
+    content['organization'] = Organization.objects.get(id=content['organization'])    
     form = TeamForm(content)
 
     # if form is not valid, display form errors
@@ -119,7 +127,13 @@ def update_team(request):
         errors.add(0, 'id', 'Team with id: {} not found'.format(team_id))
         return send_json_response('NOT_FOUND', 'Not Found', {**errors.get_dict_erros()})
 
+    # check if Organizaton object exists
+    if not 'organization' in content or not Organization.objects.filter(id=content['organization']).exists():
+        errors.add(0, 'organization', 'Organization not found')
+        return send_json_response('INTERNAL_SERVER_ERROR', 'error', {**errors.get_dict_erros()})
+
     team_object = Team.objects.get(pk=team_id)
+    content['organization'] = Organization.objects.get(id=content['organization']) 
     form = TeamForm(instance=team_object, data=content)
 
     # if form is not valid, display form errors
