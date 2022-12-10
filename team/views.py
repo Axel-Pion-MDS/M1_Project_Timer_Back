@@ -1,7 +1,7 @@
 import json
-from services.verify_method import request_method_is
-from services.errors import Errors
-from services.send_response import send_json_response
+from service.verify_method import request_method_is
+from service.errors import Errors
+from service.send_response import send_json_response
 from team.normalizers import teams_normalizer, team_normalizer, user_team_normalizer
 from team.models import Team, UserTeam
 from team.forms import TeamForm, UserTeamForm
