@@ -37,6 +37,8 @@ def login(request):
             check_password = pbkdf2_sha256.verify(password, user.password)
             if check_password:
                 message = 'You are logged in'
+                user = User.objects.get(email=email)
+                data = user_normalizer(user)
             else:
                 return JsonResponse({
                     'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
@@ -59,7 +61,7 @@ def login(request):
     # Change key
     key = TOKEN_KEY
     token = jwt.encode({"id": user.id}, key, algorithm="HS256" )
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'token': token})
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'token': token, 'user': data})
 
 
 @csrf_exempt
@@ -116,6 +118,7 @@ def register(request):
                 new_user = form.save(commit=False)
                 new_user.password = pbkdf2_sha256.hash(new_user.password)
                 new_user.save()
+                data = user_normalizer(User.objects.latest('id'))
             else:
                 return JsonResponse({
                     'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
@@ -138,7 +141,7 @@ def register(request):
     # Change key
     key = TOKEN_KEY
     token = jwt.encode({"id": new_user.id}, key, algorithm="HS256" )
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'token': token})
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'token': token, 'user': data})
 
 
 @csrf_exempt
