@@ -35,17 +35,13 @@ def login(request):
                     'message': 'User not found.'
                 })
             check_password = pbkdf2_sha256.verify(password, user.password)
-            if check_password:
-                message = 'You are logged in'
-                user = User.objects.get(email=email)
-                data = user_normalizer(user)
-            else:
+            if not check_password:
                 return JsonResponse({
                     'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
                     'result': 'Not Allowed',
                     'message': 'password incorrect',
-                })
-        else:
+                })         
+            data = user_normalizer(user)
             return JsonResponse({
                 'code': settings.HTTP_CONSTANTS['INTERNAL_SERVER_ERROR'],
                 'result': 'error',
