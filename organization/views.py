@@ -1,6 +1,5 @@
 import django.middleware.csrf
 import json
-import jwt
 
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
