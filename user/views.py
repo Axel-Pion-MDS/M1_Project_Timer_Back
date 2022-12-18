@@ -1,5 +1,6 @@
 import django.middleware.csrf
 import json
+import jwt
 
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
@@ -8,6 +9,11 @@ from .models import User
 from .normalizers import user_normalizer, users_normalizer
 from .forms import UserForm, LoginForm
 from passlib.hash import pbkdf2_sha256
+from environs import Env
+
+env = Env()
+env.read_env()
+TOKEN_KEY = env("JWT_TOKEN_KEY")
 
 
 # @csrf_protect
@@ -29,15 +35,13 @@ def login(request):
                     'message': 'User not found.'
                 })
             check_password = pbkdf2_sha256.verify(password, user.password)
-            if check_password:
-                message = 'You are logged in'
-            else:
+            if not check_password:
                 return JsonResponse({
                     'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
                     'result': 'Not Allowed',
                     'message': 'password incorrect',
-                })
-        else:
+                })         
+            data = user_normalizer(user)
             return JsonResponse({
                 'code': settings.HTTP_CONSTANTS['INTERNAL_SERVER_ERROR'],
                 'result': 'error',
@@ -50,7 +54,10 @@ def login(request):
             'result': 'Not Allowed',
             'message': 'Must be a POST method',
         })
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'message': message})
+    # Change key
+    key = TOKEN_KEY
+    token = jwt.encode({"id": user.id}, key, algorithm="HS256" )
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'token': token, 'user': data})
 
 
 @csrf_exempt
@@ -127,15 +134,18 @@ def register(request):
             'result': 'Not Allowed',
             'message': 'Must be a POST method',
         })
-
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
+    # Change key
+    key = TOKEN_KEY
+    token = jwt.encode({"id": new_user.id}, key, algorithm="HS256" )
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'token': token, 'user': data})
 
 
 @csrf_exempt
-def update_user(request, user_id):
+def update_user(request):
     if request.method == 'PATCH':
         decode = request.body.decode('utf-8')
         content = json.loads(decode)
+        user_id = content['id']
 
         try:
             user = User.objects.get(pk=user_id)
