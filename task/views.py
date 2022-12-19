@@ -191,7 +191,7 @@ def add_task(request):
             return user_team
 
         role_id = user_team.role_id
-        has_role = verify_user_role.has_role(role_id, ['ROLE_TEAM_LEADER'])
+        has_role = verify_user_role.has_role(role_id, ['ROLE_TEAM_LEADER'], 'You are not the leader of this team.')
 
         if not has_role:
             return has_role
@@ -222,7 +222,7 @@ def update_task(request):
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
-        User.objects.get(id=jwt_content.get('id'))
+        user = User.objects.get(id=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -266,7 +266,7 @@ def update_task(request):
             return user_team
 
         role_id = user_team.role_id
-        has_role = verify_user_role.has_role(role_id, ['ROLE_TEAM_LEADER'])
+        has_role = verify_user_role.has_role(role_id, ['ROLE_TEAM_LEADER'], 'You are not the leader of this team.')
 
         if not has_role:
             return has_role
@@ -307,7 +307,7 @@ def delete_task(request, task_id):
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
-        User.objects.get(id=jwt_content.get('id'))
+        user = User.objects.get(id=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -323,7 +323,7 @@ def delete_task(request, task_id):
             'result': 'error',
             'message': 'Task not found.'
         })
-    
+
     try:
         project = Project.objects.get(pk=task.project_id)
     except Project.DoesNotExist:
@@ -357,7 +357,7 @@ def delete_task(request, task_id):
             return user_team
 
         role_id = user_team.role_id
-        has_role = verify_user_role.has_role(role_id, ['ROLE_TEAM_LEADER'])
+        has_role = verify_user_role.has_role(role_id, ['ROLE_TEAM_LEADER'], 'You are not the leader of this team.')
 
         if not has_role:
             return has_role
