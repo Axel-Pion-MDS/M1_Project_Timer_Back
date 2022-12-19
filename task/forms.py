@@ -13,5 +13,5 @@ class TaskForm(forms.ModelForm):
             'provisional_time',
             'is_billable',
             'is_ended',
-            # 'project',
+            'project',
         )

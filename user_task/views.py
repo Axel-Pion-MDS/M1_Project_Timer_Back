@@ -25,6 +25,17 @@ def get_user_tasks(request):
             'message': 'Must be a GET method',
         })
 
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(id=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
+        })
+
     user_tasks = UserTask.objects.all().values()
 
     if not user_tasks:
@@ -41,6 +52,17 @@ def get_user_task(request, user_task_id):
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
             'result': 'Not Allowed',
             'message': 'Must be a GET method',
+        })
+
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(id=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
         })
 
     try:
@@ -64,6 +86,18 @@ def get_users_from_task(request, task_id):
             'result': 'Not Allowed',
             'message': 'Must be a GET method',
         })
+
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(id=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
+        })
+
     try:
         task = Task.objects.get(pk=task_id)
     except Task.DoesNotExist:
