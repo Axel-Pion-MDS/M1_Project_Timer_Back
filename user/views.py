@@ -10,10 +10,7 @@ from .normalizers import user_normalizer, users_normalizer
 from .forms import UserForm, LoginForm
 from passlib.hash import pbkdf2_sha256
 from environs import Env
-
-env = Env()
-env.read_env()
-TOKEN_KEY = env("JWT_TOKEN_KEY")
+from service import tokenDecode
 
 
 # @csrf_protect
@@ -59,7 +56,7 @@ def login(request):
 
     data = user_normalizer(user)
     key = TOKEN_KEY
-    token = jwt.encode(data['role'], key, algorithm="HS256")
+    token = jwt.encode({"id": user.id, "role": user.role.label}, key, algorithm="HS256")
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'token': token, 'user': data})
 
 
@@ -70,6 +67,16 @@ def get_users(request):
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
             'result': 'Not Allowed',
             'message': 'Must be a GET method',
+        })
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        User.objects.get(pk=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
         })
 
     users = User.objects.all().values()
@@ -90,7 +97,9 @@ def get_user(request, user_id):
         })
 
     try:
-        user = User.objects.get(pk=user_id)
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(pk=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -137,17 +146,8 @@ def register(request):
     data = user_normalizer(User.objects.latest('id'))
     # Change key
     key = TOKEN_KEY
-    user = {
-        "id": new_user.id,
-        "firstname": new_user.firstname,
-        "lastname": new_user.lastname,
-        "role": {
-            "id": new_user.role.id,
-            "label": new_user.role.label
-        }
-    }
-    token = jwt.encode(user, key, algorithm="HS256")
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'token': token, 'user': data}, safe=False)
+    token = jwt.encode({"id": new_user.id, "role": new_user.role.label}, key, algorithm="HS256")
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'token': token, 'user': data})
 
 
 @csrf_exempt
@@ -161,10 +161,11 @@ def update_user(request):
 
     decode = request.body.decode('utf-8')
     content = json.loads(decode)
-    user_id = content['id']
 
     try:
-        user = User.objects.get(pk=user_id)
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(pk=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -189,46 +190,6 @@ def update_user(request):
 
 
 @csrf_exempt
-def update_user(request, user_id):
-    if request.method == 'PATCH':
-        decode = request.body.decode('utf-8')
-        content = json.loads(decode)
-
-        try:
-            user = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'User not found.'
-            })
-
-        form = UserForm(instance=user, data=content)
-
-        if form.is_valid():
-            update_user = form.save(commit=False)
-            update_user.password = pbkdf2_sha256.hash(update_user.password)
-            update_user.save()
-        else:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'Could not save the data',
-                'data': form.errors
-            })
-
-    else:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
-            'message': 'Must be a PATCH method',
-        })
-
-    data = user_normalizer(user)
-
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
-
-@csrf_exempt
 def delete_user(request, user_id):
     if request.method != 'DELETE':
         return JsonResponse({
@@ -238,7 +199,9 @@ def delete_user(request, user_id):
         })
 
     try:
-        user = User.objects.get(pk=user_id)
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(pk=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
