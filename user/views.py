@@ -55,9 +55,9 @@ def login(request):
         })
 
     data = user_normalizer(user)
-    # user_role = 
+    jwt_body = {"id": user.id, "role": data["role"]}
     key = TOKEN_KEY
-    token = jwt.encode({"id": user.id, "role": data["role"]}, key, algorithm="HS256")
+    token = jwt.encode(jwt_body, key, algorithm="HS256")
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'token': token, 'user': data})
 
 
@@ -151,9 +151,9 @@ def register(request):
     new_user.password = pbkdf2_sha256.hash(new_user.password)
     new_user.save()
     data = user_normalizer(User.objects.latest('id'))
-    # Change key
+    jwt_body = {"id": new_user.id, "role": data["role"]}
     key = TOKEN_KEY
-    token = jwt.encode({"id": new_user.id, "role": new_user.role.label}, key, algorithm="HS256")
+    token = jwt.encode(jwt_body, key, algorithm="HS256")
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'token': token, 'user': data})
 
 
