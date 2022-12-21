@@ -10,6 +10,7 @@ from .normalizers import user_normalizer, users_normalizer
 from .forms import UserForm, LoginForm
 from passlib.hash import pbkdf2_sha256
 from environs import Env
+from service import tokenDecode
 
 env = Env()
 env.read_env()
@@ -58,8 +59,9 @@ def login(request):
         })
 
     data = user_normalizer(user)
+    jwt_body = {"id": user.id, "role": data["role"]}
     key = TOKEN_KEY
-    token = jwt.encode({"id": user.id}, key, algorithm="HS256")
+    token = jwt.encode(jwt_body, key, algorithm="HS256")
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'token': token, 'user': data})
 
 
@@ -70,6 +72,22 @@ def get_users(request):
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
             'result': 'Not Allowed',
             'message': 'Must be a GET method',
+        })
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        User.objects.get(pk=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
+        })
+    if jwt_content.get('role').get('id') != settings.ROLES['ROLE_ADMIN'] or settings.ROLES['ROLE_SUPER_ADMIN']:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'error',
+            'message': "User doesn't have right access."
         })
 
     users = User.objects.all().values()
@@ -90,7 +108,9 @@ def get_user(request, user_id):
         })
 
     try:
-        user = User.objects.get(pk=user_id)
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(pk=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -135,9 +155,9 @@ def register(request):
     new_user.password = pbkdf2_sha256.hash(new_user.password)
     new_user.save()
     data = user_normalizer(User.objects.latest('id'))
-    # Change key
+    jwt_body = {"id": new_user.id, "role": data["role"]}
     key = TOKEN_KEY
-    token = jwt.encode({"id": new_user.id}, key, algorithm="HS256")
+    token = jwt.encode(jwt_body, key, algorithm="HS256")
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'token': token, 'user': data})
 
 
@@ -152,17 +172,24 @@ def update_user(request):
 
     decode = request.body.decode('utf-8')
     content = json.loads(decode)
-    user_id = content['id']
+    id = content["id"]
 
     try:
-        user = User.objects.get(pk=user_id)
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(pk=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
             'result': 'error',
             'message': 'User not found.'
         })
-
+    if id != user.id:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
+            'result': 'error',
+            'message': 'User can only update your own profile'
+        })
     form = UserForm(instance=user, data=content)
     if not form.is_valid():
         return JsonResponse({
@@ -189,12 +216,20 @@ def delete_user(request, user_id):
         })
 
     try:
-        user = User.objects.get(pk=user_id)
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(pk=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
             'result': 'error',
             'message': 'User not found.'
+        })
+    if user_id != user.id:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
+            'result': 'error',
+            'message': 'User can only update your own profile'
         })
 
     user.delete()
