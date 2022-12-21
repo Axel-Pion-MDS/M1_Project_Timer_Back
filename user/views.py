@@ -79,7 +79,7 @@ def get_users(request):
             'result': 'error',
             'message': 'User not found.'
         })
-    if jwt_content.get('role').get('id') != settings.ROLES['ROLE_ADMIN'] or settings.ROLES['ROLE_SUPER_ADMIN']:
+    if not (jwt_content.get('role').get('id') == settings.ROLES['ROLE_ADMIN'] or settings.ROLES['ROLE_SUPER_ADMIN']):
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
             'result': 'error',
