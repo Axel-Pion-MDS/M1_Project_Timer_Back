@@ -55,8 +55,9 @@ def login(request):
         })
 
     data = user_normalizer(user)
+    # user_role = 
     key = TOKEN_KEY
-    token = jwt.encode({"id": user.id, "role": user.role.label}, key, algorithm="HS256")
+    token = jwt.encode({"id": user.id, "role": data["role"]}, key, algorithm="HS256")
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'token': token, 'user': data})
 
 
@@ -77,6 +78,12 @@ def get_users(request):
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
             'result': 'error',
             'message': 'User not found.'
+        })
+    if jwt_content.get('role').get('id') != settings.ROLES['ROLE_ADMIN'] or settings.ROLES['ROLE_SUPER_ADMIN']:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'error',
+            'message': "User doesn't have right access."
         })
 
     users = User.objects.all().values()
@@ -161,6 +168,7 @@ def update_user(request):
 
     decode = request.body.decode('utf-8')
     content = json.loads(decode)
+    id = content["id"]
 
     try:
         authorization = request.headers.get('Authorization')
@@ -172,7 +180,12 @@ def update_user(request):
             'result': 'error',
             'message': 'User not found.'
         })
-
+    if id != user.id:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
+            'result': 'error',
+            'message': 'User can only update your own profile'
+        })
     form = UserForm(instance=user, data=content)
     if not form.is_valid():
         return JsonResponse({
@@ -207,6 +220,12 @@ def delete_user(request, user_id):
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
             'result': 'error',
             'message': 'User not found.'
+        })
+    if user_id != user.id:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
+            'result': 'error',
+            'message': 'User can only update your own profile'
         })
 
     user.delete()
