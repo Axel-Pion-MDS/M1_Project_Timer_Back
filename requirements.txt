@@ -3,3 +3,4 @@ psycopg2-binary==2.9.5
 django-cors-headers==3.13.0
 passlib==1.7.4
 pyjwt==2.6.0
+environs==9.5.0
