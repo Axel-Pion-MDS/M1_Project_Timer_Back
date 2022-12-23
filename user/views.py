@@ -9,7 +9,6 @@ from .models import User
 from .normalizers import user_normalizer, users_normalizer
 from .forms import UserForm, LoginForm
 from passlib.hash import pbkdf2_sha256
-from environs import Env
 from service import tokenDecode
 
 
