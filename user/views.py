@@ -59,7 +59,7 @@ def login(request):
 
     data = user_normalizer(user)
     key = TOKEN_KEY
-    token = jwt.encode({"id": user.id}, key, algorithm="HS256")
+    token = jwt.encode(data['role'], key, algorithm="HS256")
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'token': token, 'user': data})
 
 
@@ -137,8 +137,17 @@ def register(request):
     data = user_normalizer(User.objects.latest('id'))
     # Change key
     key = TOKEN_KEY
-    token = jwt.encode({"id": new_user.id}, key, algorithm="HS256")
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'token': token, 'user': data})
+    user = {
+        "id": new_user.id,
+        "firstname": new_user.firstname,
+        "lastname": new_user.lastname,
+        "role": {
+            "id": new_user.role.id,
+            "label": new_user.role.label
+        }
+    }
+    token = jwt.encode(user, key, algorithm="HS256")
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'token': token, 'user': data}, safe=False)
 
 
 @csrf_exempt

@@ -36,7 +36,7 @@ def get_user_tasks(request):
             'message': 'User not found.'
         })
 
-    user_tasks = UserTask.objects.all().values()
+    user_tasks = UserTask.objects.all().get(user=user.id)
 
     if not user_tasks:
         return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
@@ -57,7 +57,7 @@ def get_user_task(request, user_task_id):
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
-        user = User.objects.get(id=jwt_content.get('id'))
+        User.objects.get(id=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],

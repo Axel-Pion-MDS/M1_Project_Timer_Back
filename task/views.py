@@ -65,7 +65,11 @@ def get_tasks(request, project_id):
         if not isinstance(user_team, UserTeam):
             return user_team
 
-    tasks = Task.objects.all()
+    tasks = Task.objects.all().get(project=project_id)
+
+    if not tasks:
+        return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
+
     data = tasks_normalizer(tasks)
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
 
