@@ -19,7 +19,6 @@ from service import tokenDecode
 def get_organizations(request):
     if request.method == 'GET':
         organizations = Organization.objects.all().values()
-
         if organizations:
             data = organizations_normalizer(organizations)
         else:

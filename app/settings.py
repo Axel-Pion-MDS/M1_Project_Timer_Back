@@ -46,8 +46,7 @@ INSTALLED_APPS = [
     'team.apps.TeamConfig',
     'user_organization.apps.UserOrganizationConfig',
     'user_task.apps.UserTaskConfig',
-    'project.apps.ProjectConfig'
-    'organization.apps.OrganizationConfig',
+    'project.apps.ProjectConfig',
     'task.apps.TaskConfig',
 ]
 

@@ -11,7 +11,7 @@ class Task(models.Model):
     is_ended = models.BooleanField()
     created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, auto_now_add=False)
-    # project = models.ForeignKey('project.project', on_delete=models.CASCADE, blank=True, null=True)
+    project = models.ForeignKey('project.Project', on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return '{}. {}'.format(self.id, self.label)

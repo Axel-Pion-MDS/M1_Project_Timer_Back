@@ -5,8 +5,9 @@ from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
+from project.models import Project
 from service import tokenDecode, verify_user_in_model, verify_user_role
-from team.models import Team, UserTeam
+from team.models import UserTeam
 from user.models import User
 from user_organization.models import UserOrganization
 from .models import Task
@@ -66,6 +67,7 @@ def get_tasks(request, project_id):
             return user_team
 
     tasks = Task.objects.all().get(project=project_id)
+    return HttpResponse(tasks)
 
     if not tasks:
         return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})

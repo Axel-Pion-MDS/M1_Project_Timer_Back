@@ -8,6 +8,7 @@ class Team(models.Model):
     created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, auto_now_add=False)
     organization = models.ForeignKey('organization.Organization', on_delete=models.PROTECT, null=True, default=None)
+    # project = models.ForeignKey('project.Project', on_delete=models.CASCADE, null=True, default=None)
 
     def __str__(self):
         return '{}. {} from organization {}'.format(

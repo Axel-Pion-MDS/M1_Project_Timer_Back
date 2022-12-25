@@ -1,3 +1,4 @@
+from project.models import Project
 from .models import Task
 
 
@@ -5,6 +6,7 @@ def tasks_normalizer(data):
     result = []
     for task in data:
         task_details = Task.objects.get(pk=task['id'])
+        project_details = Project.objects.get(pk=task['id'])
 
         item = {
             'id': task['id'],

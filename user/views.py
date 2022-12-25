@@ -55,7 +55,7 @@ def login(request):
 
     data = user_normalizer(user)
     jwt_body = {"id": user.id, "role": data["role"]}
-    key = TOKEN_KEY
+    key = settings.TOKEN_KEY
     token = jwt.encode(jwt_body, key, algorithm="HS256")
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'token': token, 'user': data})
 
@@ -151,7 +151,7 @@ def register(request):
     new_user.save()
     data = user_normalizer(User.objects.latest('id'))
     jwt_body = {"id": new_user.id, "role": data["role"]}
-    key = TOKEN_KEY
+    key = settings.TOKEN_KEY
     token = jwt.encode(jwt_body, key, algorithm="HS256")
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'token': token, 'user': data})
 
