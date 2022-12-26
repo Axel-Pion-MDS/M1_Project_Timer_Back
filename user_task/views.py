@@ -36,9 +36,9 @@ def get_user_tasks(request):
             'message': 'User not found.'
         })
 
-    user_tasks = UserTask.objects.all().get(user=user.id)
-
-    if not user_tasks:
+    try:
+        user_tasks = UserTask.objects.all().get(user=user.id)
+    except UserTask.DoesNotExist:
         return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
 
     data = user_tasks_normalizer(user_tasks)

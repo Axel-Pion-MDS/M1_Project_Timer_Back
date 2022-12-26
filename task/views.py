@@ -15,7 +15,7 @@ from .normalizers import task_normalizer, tasks_normalizer
 from .forms import TaskForm
 
 
-def get_tasks(request, project_id):
+def get_project_tasks(request, project_id):
     if request.method != 'GET':
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
@@ -35,7 +35,7 @@ def get_tasks(request, project_id):
         })
 
     try:
-        Project.objects.get(pk=project_id)
+        project = Project.objects.get(pk=project_id)
     except Project.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -43,7 +43,7 @@ def get_tasks(request, project_id):
             'message': 'Project not found.'
         })
 
-    user_organization = verify_user_in_model.get_user_organization_from_project(user, project_id)
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
@@ -62,14 +62,13 @@ def get_tasks(request, project_id):
         return has_role
 
     if role_id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']:
-        user_team = verify_user_in_model.get_user_team_from_project(user, project_id)
+        user_team = verify_user_in_model.get_user_team_from_project(user, project)
         if not isinstance(user_team, UserTeam):
             return user_team
 
-    tasks = Task.objects.all().get(project=project_id)
-    return HttpResponse(tasks)
-
-    if not tasks:
+    try:
+        tasks = Task.objects.all().filter(project=project_id)
+    except Task.DoesNotExist:
         return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
 
     data = tasks_normalizer(tasks)
@@ -107,7 +106,7 @@ def get_task(request, task_id):
 
     project_id = task.project.id
     try:
-        Project.objects.get(pk=project_id)
+        project = Project.objects.get(pk=project_id)
     except Project.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -115,7 +114,7 @@ def get_task(request, task_id):
             'message': 'Project not found.'
         })
 
-    user_organization = verify_user_in_model.get_user_organization_from_project(user, project_id)
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
@@ -133,7 +132,7 @@ def get_task(request, task_id):
         return has_role
 
     if role_id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']:
-        user_team = verify_user_in_model.get_user_team_from_project(user, project_id)
+        user_team = verify_user_in_model.get_user_team_from_project(user, project)
         if not isinstance(user_team, UserTeam):
             return user_team
 
@@ -173,7 +172,7 @@ def add_task(request):
             'message': 'Project not found.'
         })
 
-    user_organization = verify_user_in_model.get_user_organization_from_project(user, project.id)
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
@@ -192,7 +191,7 @@ def add_task(request):
         return has_role
 
     if role_id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']:
-        user_team = verify_user_in_model.get_user_team_from_project(user, project.id)
+        user_team = verify_user_in_model.get_user_team_from_project(user, project)
         if not isinstance(user_team, UserTeam):
             return user_team
 
@@ -248,7 +247,7 @@ def update_task(request):
             'message': 'Project not found.'
         })
 
-    user_organization = verify_user_in_model.get_user_organization_from_project(user, project.id)
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
@@ -267,7 +266,7 @@ def update_task(request):
         return has_role
 
     if role_id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']:
-        user_team = verify_user_in_model.get_user_team_from_project(user, project.id)
+        user_team = verify_user_in_model.get_user_team_from_project(user, project)
         if not isinstance(user_team, UserTeam):
             return user_team
 
@@ -339,7 +338,7 @@ def delete_task(request, task_id):
             'message': 'Project not found.'
         })
 
-    user_organization = verify_user_in_model.get_user_organization_from_project(user, project.id)
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 

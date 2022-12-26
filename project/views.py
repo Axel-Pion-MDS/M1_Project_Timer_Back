@@ -16,6 +16,72 @@ from user_organization.models import UserOrganization
 from team.models import UserTeam
 
 
+@csrf_exempt
+def get_projects(request):
+    if request.method != 'GET':
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'Not Allowed',
+            'message': 'Must be a GET method',
+        })
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        User.objects.get(pk=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
+        })
+    if not (jwt_content.get('role').get('id') == settings.ROLES['ROLE_ADMIN'] or settings.ROLES['ROLE_SUPER_ADMIN']):
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'error',
+            'message': "User doesn't have right access."
+        })
+
+    projects = Project.objects.all().values()
+    if not projects:
+        return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
+
+    data = projects_normalizer(projects)
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
+
+
+@csrf_exempt
+def get_project(request, project_id):
+    if request.method != "GET":
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'Not Allowed',
+            'message': 'Must be a GET method',
+        })
+
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        User.objects.get(pk=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
+        })
+
+    try:
+        project = Project.objects.get(pk=project_id)
+    except Project.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Project not found.'
+        })
+
+    data = project_normalizer(project)
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
+
+
 # @csrf_protect
 @csrf_exempt
 def add_project(request):
@@ -108,72 +174,6 @@ def add_project(request):
     new_project.save()
     data = project_normalizer(Project.objects.latest('id'))
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'project': data})
-
-
-@csrf_exempt
-def get_projects(request):
-    if request.method != 'GET':
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
-            'message': 'Must be a GET method',
-        })
-    try:
-        authorization = request.headers.get('Authorization')
-        jwt_content = tokenDecode.decode_token(authorization)
-        User.objects.get(pk=jwt_content.get('id'))
-    except User.DoesNotExist:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-            'result': 'error',
-            'message': 'User not found.'
-        })
-    if not (jwt_content.get('role').get('id') == settings.ROLES['ROLE_ADMIN'] or settings.ROLES['ROLE_SUPER_ADMIN']):
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'error',
-            'message': "User doesn't have right access."
-        })
-
-    projects = Project.objects.all().values()
-    if not projects:
-        return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
-
-    data = projects_normalizer(projects)
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
-
-
-@csrf_exempt
-def get_project(request, project_id):
-    if request.method != "GET":
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
-            'message': 'Must be a GET method',
-        })
-
-    try:
-        authorization = request.headers.get('Authorization')
-        jwt_content = tokenDecode.decode_token(authorization)
-        User.objects.get(pk=jwt_content.get('id'))
-    except User.DoesNotExist:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-            'result': 'error',
-            'message': 'User not found.'
-        })
-
-    try:
-        project = Project.objects.get(pk=project_id)
-    except Project.DoesNotExist:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-            'result': 'error',
-            'message': 'Project not found.'
-        })
-
-    data = project_normalizer(project)
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
 
 
 @csrf_exempt
