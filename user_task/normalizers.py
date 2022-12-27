@@ -4,10 +4,10 @@ from .models import UserTask
 def user_tasks_normalizer(data):
     result = []
     for user_task in data:
-        user_task_details = UserTask.objects.get(pk=user_task['id'])
+        user_task_details = UserTask.objects.get(pk=user_task.id)
 
         item = {
-            'id': user_task['id'],
+            'id': user_task.id,
             'task': {
                 'id': user_task_details.task.id,
                 'label': user_task_details.task.label,
@@ -52,16 +52,14 @@ def users_from_task_normalizer(data, task):
     items = []
     for user in data:
         items.append({
-            'user': {
-                'id': user.user.id,
-                'firstname': user.user.firstname,
-                'lastname': user.user.lastname,
-                'email': user.user.email,
-            }
+            'id': user.user.id,
+            'firstname': user.user.firstname,
+            'lastname': user.user.lastname,
+            'email': user.user.email,
         })
 
     result.append({
-        'users': items
+        'users': items if items else 'null'
     })
 
     return result

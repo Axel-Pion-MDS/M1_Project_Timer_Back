@@ -37,7 +37,7 @@ def get_user_tasks(request):
         })
 
     try:
-        user_tasks = UserTask.objects.all().get(user=user.id)
+        user_tasks = UserTask.objects.all().filter(user=user.id)
     except UserTask.DoesNotExist:
         return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
 
@@ -180,26 +180,30 @@ def add_user_to_task(request):
             'message': 'Task not found.'
         })
 
-    try:
-        user_to_add = User.objects.get(email=content['user'])
-    except User.DoesNotExist:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-            'result': 'error',
-            'message': 'The User you are looking for has not been found.'
-        })
+    for user_in_array in content['users']:
+        try:
+            user_to_add = User.objects.get(email=user_in_array)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'The User you are looking for has not been found.'
+            })
 
-    try:
-        UserOrganization.objects.get(pk=user_to_add.id)
-        UserTeam.objects.get(pk=user_to_add.id)
-    except UserOrganization.DoesNotExist or UserTeam.DoesNotExist:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-            'result': 'error',
-            'message': 'The User you are looking for is not a member of that organization or team.'
-        })
+        try:
+            UserTeam.objects.get(pk=user_to_add.id)
+        except UserTeam.DoesNotExist:
+            try:
+                UserOrganization.objects.get(pk=user_to_add.id)
+            except UserOrganization.DoesNotExist:
+                return JsonResponse({
+                    'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                    'result': 'error',
+                    'message': 'The User you are looking for is not a member of that organization or team.'
+                })
 
-    content['user'] = user_to_add
+        content['users'].append(user_to_add)
+
     content['task'] = task
 
     if not form.is_valid():

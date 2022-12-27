@@ -90,50 +90,56 @@ def get_users_from_organization(request, organization_id):
 
 @csrf_exempt
 def add_user_to_organization(request):
-    if request.method == "POST":
-        body = request.body.decode('utf-8')
-        content = json.loads(body)
-        form = UserOrganizationForm(content)
+    if request.method != "POST":
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'Not Allowed',
+            'message': 'Must be a POST method',
+        })
 
-        try:
-            authorization = request.headers.get('Authorization')
-            jwt_content = tokenDecode.decode_token(authorization)
-            user = User.objects.get(id=jwt_content.get('id'))
-        except User.DoesNotExist:
+    body = request.body.decode('utf-8')
+    content = json.loads(body)
+
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(id=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
+        })
+
+    try:
+        organization = Organization.objects.get(pk=content['organization'])
+    except Organization.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Organization not found.'
+        })
+
+    try:
+        user_organization = UserOrganization.objects.get(user=user, organization=organization)
+        role_id = user_organization.role.id
+        if not (role_id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] or
+                role_id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER']):
             return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
                 'result': 'error',
-                'message': 'User not found.'
+                'message': 'You do not have the right privileges to access this resource.'
             })
+    except UserOrganization.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Organization not found for this User.'
+        })
 
+    for user_in_content in content['users']:
         try:
-            organization = Organization.objects.get(pk=content['organization'])
-        except Organization.DoesNotExist:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'Organization not found.'
-            })
-
-        try:
-            user_organization = UserOrganization.objects.get(user=user, organization=organization)
-            role_id = user_organization.role.id
-            if not (role_id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] or
-                    role_id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER']):
-                return JsonResponse({
-                    'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-                    'result': 'error',
-                    'message': 'You do not have the right privileges to access this resource.'
-                })
-        except UserOrganization.DoesNotExist:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'Organization not found for this User.'
-            })
-
-        try:
-            user_to_add = User.objects.get(email=content['user'])
+            user_to_add = User.objects.get(email=user_in_content['email'])
         except User.DoesNotExist:
             return JsonResponse({
                 'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -149,7 +155,7 @@ def add_user_to_organization(request):
             })
 
         try:
-            role = Role.objects.get(pk=content['role'])
+            role = Role.objects.get(pk=user_in_content['role'])
         except Role.DoesNotExist:
             return JsonResponse({
                 'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -168,24 +174,19 @@ def add_user_to_organization(request):
         content['user'] = user_to_add
         content['organization'] = organization
         content['role'] = role
-
-        if form.is_valid():
-            form.save()
-            data = user_organization_normalizer(UserOrganization.objects.latest('id'))
-        else:
+        form = UserOrganizationForm(content)
+        
+        if not form.is_valid():
             return JsonResponse({
                 'code': settings.HTTP_CONSTANTS['INTERNAL_SERVER_ERROR'],
                 'result': 'error',
                 'message': 'Could not save the data',
                 'data': form.errors
             })
-    else:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
-            'message': 'Must be a POST method',
-        })
 
+        form.save(content)
+
+    data = user_organization_normalizer(UserOrganization.objects.latest('id'))
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
 
 
