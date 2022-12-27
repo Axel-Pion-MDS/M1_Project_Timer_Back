@@ -9,6 +9,7 @@ from role.models import Role
 from organization.models import Organization
 from user.models import User
 
+
 def get_teams(request):
     """GET list of informations from teams 
 

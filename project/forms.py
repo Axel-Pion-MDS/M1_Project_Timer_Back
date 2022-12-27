@@ -8,4 +8,6 @@ class ProjectForm(forms.ModelForm):
         fields = (
             'label',
             'description',
+            'organization',
+            'team',
         )

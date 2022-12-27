@@ -1,7 +1,7 @@
 import jwt
+from django.conf import settings
 
 
-# TODO: replace secret_key and algorithms with env variables
-def decode_token(authorization, secret_key='token', algorithms='HS256'):
+def decode_token(authorization, secret_key=settings.TOKEN_KEY, algorithms='HS256'):
     token = str.replace(str(authorization), 'Bearer ', '')
     return jwt.decode(token, secret_key, algorithms)

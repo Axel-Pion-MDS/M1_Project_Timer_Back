@@ -11,11 +11,11 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 import os
+from environs import Env
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -31,7 +31,6 @@ ALLOWED_HOSTS = [
     '*',
 ]
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,12 +40,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'organization.apps.OrganizationConfig',
-    'role.apps.RoleConfig',
     'user.apps.UserConfig',
-    'team.apps.TeamConfig',
+    'role.apps.RoleConfig',
+    'organization.apps.OrganizationConfig',
     'user_organization.apps.UserOrganizationConfig',
-    'project.apps.ProjectConfig'
+    'team.apps.TeamConfig',
+    'task.apps.TaskConfig',
+    'user_task.apps.UserTaskConfig',
+    'project.apps.ProjectConfig',
 ]
 
 MIDDLEWARE = [
@@ -158,3 +159,8 @@ ROLES = {
     'ROLE_TEAM_LEADER': 7,
     'ROLE_TEAM_MEMBER': 8,
 }
+
+env = Env()
+env.read_env()
+TOKEN_KEY = env("JWT_TOKEN_KEY")
+

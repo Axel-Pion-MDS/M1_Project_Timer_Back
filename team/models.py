@@ -9,6 +9,7 @@ class Team(models.Model):
     updated_at = models.DateTimeField(auto_now=True, auto_now_add=False)
     organization = models.ForeignKey('organization.Organization', on_delete=models.PROTECT, null=True, default=None)
 
+
     def __str__(self):
         return '{}. {} from organization {}'.format(
             self.id,
@@ -18,7 +19,7 @@ class Team(models.Model):
 
     def get_users(self):
         return [user_team 
-            for user_team in UserTeam.objects.filter(team=self).all()]
+                for user_team in UserTeam.objects.filter(team=self).all()]
 
 
 class UserTeam(models.Model):
@@ -34,3 +35,4 @@ class UserTeam(models.Model):
             self.user,
             self.team
         )
+

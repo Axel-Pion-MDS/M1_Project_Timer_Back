@@ -1,27 +1,86 @@
 import django.middleware.csrf
-import json
-import jwt
+import json 
 
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
+
+from organization.models import Organization
 from .normalizers import projects_normalizer, project_normalizer
 from .forms import ProjectForm
-from passlib.hash import pbkdf2_sha256
-from environs import Env
 from service import tokenDecode, verify_user_in_model
 from user.models import User
 from .models import Project
 from user_organization.models import UserOrganization
 from team.models import UserTeam
 
-env = Env()
-env.read_env()
-TOKEN_KEY = env("JWT_TOKEN_KEY")
+@csrf_exempt
+def get_projects(request):
+    if request.method != 'GET':
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'Not Allowed',
+            'message': 'Must be a GET method',
+        })
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        User.objects.get(pk=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
+        })
+    if not (jwt_content.get('role').get('id') == settings.ROLES['ROLE_ADMIN'] or settings.ROLES['ROLE_SUPER_ADMIN']):
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'error',
+            'message': "User doesn't have right access."
+        })
+
+    projects = Project.objects.all().values()
+    if not projects:
+        return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
+
+    data = projects_normalizer(projects)
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
+
+
+@csrf_exempt
+def get_project(request, project_id):
+    if request.method != "GET":
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'Not Allowed',
+            'message': 'Must be a GET method',
+        })
+
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        User.objects.get(pk=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
+        })
+
+    try:
+        project = Project.objects.get(pk=project_id)
+    except Project.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Project not found.'
+        })
+
+    data = project_normalizer(project)
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
 
 
 # @csrf_protect
-
 @csrf_exempt
 def add_project(request):
     if request.method != "POST":
@@ -46,6 +105,16 @@ def add_project(request):
         })
 
     try:
+        Organization.objects.get(pk=organization)
+    except Organization.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Organization not found.'
+        })
+
+    try:
+
         user_organization = UserOrganization.objects.get(user=jwt_content.get('id'), organization=organization)
     except UserOrganization.DoesNotExist:
         return JsonResponse({
@@ -53,9 +122,10 @@ def add_project(request):
             'result': 'error',
             'message': 'User not found.'
         })
-    if not (user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] or 
-    user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER'] or 
-    user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']):
+
+    if not (user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] or
+            user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER'] or
+            user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']):
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
             'result': 'error',
@@ -64,10 +134,11 @@ def add_project(request):
     if user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']:
         if team is None:
             return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'error',
-            'message': "User doesn't have right access."
-        })
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': "User doesn't have right access."
+            })
+            
         try:
             user_team = UserTeam.objects.get(user=jwt_content.get('id'), team=team)
         except UserTeam.DoesNotExist:
@@ -78,10 +149,10 @@ def add_project(request):
             })
         if not user_team.role.id == settings.ROLES['ROLE_TEAM_LEADER']:
             return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'error',
-            'message': "User doesn't have right access."
-        })
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': "User doesn't have right access."
+            })
 
     label = content['label']
     if Project.objects.filter(label=label).exists():
@@ -104,6 +175,7 @@ def add_project(request):
     new_project.save()
     data = project_normalizer(Project.objects.latest('id'))
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'project': data})
+
 
 @csrf_exempt
 def get_projects(request):
@@ -169,6 +241,7 @@ def get_project(request, project_id):
     data = project_normalizer(project)
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
 
+
 @csrf_exempt
 def update_project(request):
     if request.method != 'PATCH':
@@ -184,7 +257,8 @@ def update_project(request):
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
-        User.objects.get(pk=jwt_content.get('id'))
+        user = User.objects.get(pk=jwt_content.get('id'))
+
     except User.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -200,13 +274,14 @@ def update_project(request):
             'message': 'User not found.'
         })
 
-    user_organization = verify_user_in_model.get_user_organization_from_project(jwt_content.get('id'), project_id)
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
-    if not (user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] or 
-    user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER'] or 
-    user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']):
+    if not (user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] or
+            user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER'] or
+            user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']):
+
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
             'result': 'error',
@@ -220,10 +295,11 @@ def update_project(request):
 
         if not user_team.role.id == settings.ROLES['ROLE_TEAM_LEADER']:
             return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'error',
-            'message': "User doesn't have right access."
-        })
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': "User doesn't have right access."
+            })
+
     form = ProjectForm(instance=project, data=content)
     if not form.is_valid():
         return JsonResponse({
@@ -272,9 +348,9 @@ def delete_project(request, project_id):
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
-    if not (user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] or 
-    user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER'] or 
-    user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']):
+    if not (user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] or
+            user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER'] or
+            user_organization.role.id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']):
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
             'result': 'error',
@@ -285,13 +361,13 @@ def delete_project(request, project_id):
         user_team = verify_user_in_model.get_user_team_from_project(jwt_content.get('id'), project_id)
         if not isinstance(user_team, UserTeam):
             return user_team
-            
+
         if not user_team.role.id == settings.ROLES['ROLE_TEAM_LEADER']:
             return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'error',
-            'message': "User doesn't have right access."
-        })
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': "User doesn't have right access."
+            })
 
     project.delete()
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
