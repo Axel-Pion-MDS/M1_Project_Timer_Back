@@ -5,6 +5,7 @@ from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
+from organization.models import Organization
 from task.models import Task
 from role.models import Role
 from service import tokenDecode
@@ -130,7 +131,6 @@ def add_user_to_task(request):
         })
     body = request.body.decode('utf-8')
     content = json.loads(body)
-    form = UserTaskForm(content)
 
     try:
         authorization = request.headers.get('Authorization')
@@ -144,7 +144,16 @@ def add_user_to_task(request):
         })
 
     try:
-        user_organization = UserOrganization.objects.get(pk=user.id)
+        organization = Organization.objects.get(pk=content['organization'])
+    except Organization.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Organization not found.'
+        })
+
+    try:
+        user_organization = UserOrganization.objects.get(user=user, organization=organization)
     except UserOrganization.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -159,14 +168,14 @@ def add_user_to_task(request):
             user_team = UserTeam.objects.get(pk=user.id)
         except UserTeam.DoesNotExist:
             return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
                 'result': 'error',
-                'message': 'You do not have the right privileges to access this resource.'
+                'message': 'User not found in User Team.'
             })
 
         if not (user_team.role_id == settings.ROLES['ROLE_TEAM_LEADER']):
             return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
                 'result': 'error',
                 'message': 'You do not have the right privileges to access this resource.'
             })
@@ -191,10 +200,27 @@ def add_user_to_task(request):
             })
 
         try:
+            users_in_task = UserTask.objects.filter(task=content['task'])
+        except UserTask.DoesNotExist:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'User Task not found.'
+            })
+
+        for user_in_task in users_in_task:
+            if user_to_add.id == user_in_task.user.id:
+                return JsonResponse({
+                    'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                    'result': 'error',
+                    'message': 'Task already assigned to this User.'
+                })
+
+        try:
             UserTeam.objects.get(pk=user_to_add.id)
         except UserTeam.DoesNotExist:
             try:
-                UserOrganization.objects.get(pk=user_to_add.id)
+                test = UserOrganization.objects.get(user=user_to_add.id)
             except UserOrganization.DoesNotExist:
                 return JsonResponse({
                     'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -202,132 +228,21 @@ def add_user_to_task(request):
                     'message': 'The User you are looking for is not a member of that organization or team.'
                 })
 
-        content['users'].append(user_to_add)
-
-    content['task'] = task
-
-    if not form.is_valid():
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['INTERNAL_SERVER_ERROR'],
-            'result': 'error',
-            'message': 'Could not save the data',
-            'data': form.errors
-        })
-
-    form.save()
-    data = user_task_normalizer(UserTask.objects.latest('id'))
-
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
-
-
-@csrf_exempt
-def update_user_role_from_task(request):
-    if request.method == 'PATCH':
-        body = request.body.decode('utf-8')
-        content = json.loads(body)
-
-        try:
-            authorization = request.headers.get('Authorization')
-            jwt_content = tokenDecode.decode_token(authorization)
-            user = User.objects.get(id=jwt_content.get('id'))
-        except User.DoesNotExist:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'User not found.'
-            })
-
-        try:
-            task = Task.objects.get(pk=content['task'])
-        except Task.DoesNotExist:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'Task not found.'
-            })
-
-        try:
-            user_task = UserTask.objects.get(user=user, task=task)
-            role_id = user_task.role.id
-            if not (role_id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] or
-                    role_id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER']):
-                return JsonResponse({
-                    'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-                    'result': 'error',
-                    'message': 'You do not have the right privileges to access this resource.'
-                })
-        except UserTask.DoesNotExist:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'Task not found for this User.'
-            })
-
-        try:
-            user_to_update = User.objects.get(email=content['user'])
-            try:
-                task_to_update = UserTask.objects.get(user=user_to_update, task=task)
-            except UserTask.DoesNotExist:
-                return JsonResponse({
-                    'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                    'result': 'error',
-                    'message': 'The User is not present in this Task.'
-                })
-        except User.DoesNotExist:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'The User you are looking for has not been found.'
-            })
-
-        if user_to_update == user:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
-                'result': 'error',
-                'message': 'Can not update yourself.'
-            })
-
-        try:
-            role = Role.objects.get(pk=content['role'])
-        except Role.DoesNotExist:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'Role not found.'
-            })
-
-        if not (role.id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER'] or
-                role.id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']):
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
-                'result': 'error',
-                'message': 'Wrong Role for Task.'
-            })
-
-        content['user'] = user_to_update
+        content['user'] = user_to_add
         content['task'] = task
-        content['role'] = role
+        form = UserTaskForm(content)
 
-        form = UserTaskForm(instance=task_to_update, data=content)
-
-        if form.is_valid():
-            task_to_update.save()
-        else:
+        if not form.is_valid():
             return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'code': settings.HTTP_CONSTANTS['INTERNAL_SERVER_ERROR'],
                 'result': 'error',
                 'message': 'Could not save the data',
                 'data': form.errors
             })
 
-    else:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
-            'message': 'Must be a PATCH method',
-        })
+        form.save()
 
-    data = user_task_normalizer(task_to_update)
+    data = user_task_normalizer(UserTask.objects.latest('id'))
 
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
 
@@ -350,6 +265,15 @@ def delete_user_from_task(request):
             })
 
         try:
+            organization = Organization.objects.get(pk=content['organization'])
+        except Organization.DoesNotExist:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'Organization not found.'
+            })
+
+        try:
             task = Task.objects.get(pk=content['task'])
         except Task.DoesNotExist:
             return JsonResponse({
@@ -359,8 +283,8 @@ def delete_user_from_task(request):
             })
 
         try:
-            user_task = UserTask.objects.get(user=user, task=task)
-            role_id = user_task.role.id
+            user_organization = UserOrganization.objects.get(user=user, organization=organization)
+            role_id = user_organization.role.id
             if not (role_id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] or
                     role_id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER']):
                 return JsonResponse({
@@ -392,13 +316,6 @@ def delete_user_from_task(request):
                 'message': 'The User you are looking for has not been found.'
             })
 
-        if user_to_delete == user:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
-                'result': 'error',
-                'message': 'Can not delete yourself.'
-            })
-
         if ((user_to_delete.role.id == settings.ROLES['ROLE_ORGANIZATION_CO_OWNER'] or
              user_to_delete.role.id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']) and
                 user.role.id != settings.ROLES['ROLE_ORGANIZATION_OWNER']):
@@ -417,7 +334,7 @@ def delete_user_from_task(request):
             })
 
         if (user_to_delete.role.id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] and
-                user.role.id == settings.ROLES['ROLE_ORGANIZATION_OWNER']):
+                user.role.id != settings.ROLES['ROLE_ORGANIZATION_OWNER']):
             return JsonResponse({
                 'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
                 'result': 'error',

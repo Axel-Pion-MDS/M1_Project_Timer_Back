@@ -174,8 +174,8 @@ def add_user_to_organization(request):
         content['user'] = user_to_add
         content['organization'] = organization
         content['role'] = role
+
         form = UserOrganizationForm(content)
-        
         if not form.is_valid():
             return JsonResponse({
                 'code': settings.HTTP_CONSTANTS['INTERNAL_SERVER_ERROR'],

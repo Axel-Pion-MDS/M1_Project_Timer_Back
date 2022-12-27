@@ -26,18 +26,24 @@ def user_tasks_normalizer(data):
 
 
 def user_task_normalizer(data):
+    members = []
+    users_in_task = UserTask.objects.filter(task=data.task.id)
+
+    for member in users_in_task:
+        members.append({
+            'id': member.user.id,
+            'firstname': member.user.firstname,
+            'lastname': member.user.lastname,
+            'email': member.user.email,
+        })
+
     return {
         'id': data.id,
         'task': {
             'id': data.task.id,
             'label': data.task.label,
         },
-        'user': {
-            'id': data.user.id,
-            'firstname': data.user.firstname,
-            'lastname': data.user.lastname,
-            'email': data.user.email,
-        }
+        'user': members if members else 'null'
     }
 
 
