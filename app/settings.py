@@ -40,14 +40,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'organization.apps.OrganizationConfig',
-    'role.apps.RoleConfig',
     'user.apps.UserConfig',
-    'team.apps.TeamConfig',
+    'role.apps.RoleConfig',
+    'organization.apps.OrganizationConfig',
     'user_organization.apps.UserOrganizationConfig',
+    'team.apps.TeamConfig',
+    'task.apps.TaskConfig',
     'user_task.apps.UserTaskConfig',
     'project.apps.ProjectConfig',
-    'task.apps.TaskConfig',
 ]
 
 MIDDLEWARE = [
@@ -163,3 +163,4 @@ ROLES = {
 env = Env()
 env.read_env()
 TOKEN_KEY = env("JWT_TOKEN_KEY")
+

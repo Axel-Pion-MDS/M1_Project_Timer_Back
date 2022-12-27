@@ -403,4 +403,3 @@ def delete_user_from_organization(request):
         })
 
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
-

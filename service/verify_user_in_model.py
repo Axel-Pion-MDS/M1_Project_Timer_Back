@@ -7,6 +7,7 @@ from team.models import Team, UserTeam
 from user_organization.models import UserOrganization
 
 
+
 def get_user_organization_from_project(user, project):
     organization = get_organization_from_project(project)
 
@@ -22,6 +23,7 @@ def get_user_organization_from_project(user, project):
     return user_organization
 
 
+
 def get_user_team_from_project(user, project):
     team = get_team_from_project(project)
     try:
@@ -34,6 +36,7 @@ def get_user_team_from_project(user, project):
         })
 
     return user_team
+
 
 
 def get_organization_from_project(project):

@@ -1,5 +1,4 @@
 from project.models import Project
-from .models import Organization
 
 
 def organizations_normalizer(data):

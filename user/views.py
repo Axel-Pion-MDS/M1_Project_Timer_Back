@@ -241,6 +241,7 @@ def update_user(request, user_id):
 
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
 
+
 @csrf_exempt
 def delete_user(request, user_id):
     if request.method != 'DELETE':
