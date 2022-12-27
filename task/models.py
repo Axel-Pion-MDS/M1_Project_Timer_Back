@@ -9,5 +9,9 @@ class Task(models.Model):
   paused = models.BooleanField(default=False)
   created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True, auto_now_add=False)
-
-  
+  project = models.ForeignKey(
+    'project.project',
+    on_delete=models.CASCADE,
+    null=False,
+    blank=True,
+    )
