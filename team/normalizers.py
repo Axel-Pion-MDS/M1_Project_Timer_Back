@@ -12,6 +12,7 @@ def users_teams_normalizer(data):
         }
     } for user_team in data]
 
+
 def user_team_normalizer(data):
     return {
         'id': data.id,
@@ -22,6 +23,7 @@ def user_team_normalizer(data):
             'label': data.role.label
         }
     }
+
 
 def teams_normalizer(data):
     return [{

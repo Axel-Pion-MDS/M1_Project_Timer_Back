@@ -9,12 +9,7 @@ from .models import User
 from .normalizers import user_normalizer, users_normalizer
 from .forms import UserForm, LoginForm
 from passlib.hash import pbkdf2_sha256
-from environs import Env
 from service import tokenDecode
-
-env = Env()
-env.read_env()
-TOKEN_KEY = env("JWT_TOKEN_KEY")
 
 
 # @csrf_protect
@@ -60,7 +55,7 @@ def login(request):
 
     data = user_normalizer(user)
     jwt_body = {"id": user.id, "role": data["role"]}
-    key = TOKEN_KEY
+    key = settings.TOKEN_KEY
     token = jwt.encode(jwt_body, key, algorithm="HS256")
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'token': token, 'user': data})
 
@@ -156,7 +151,7 @@ def register(request):
     new_user.save()
     data = user_normalizer(User.objects.latest('id'))
     jwt_body = {"id": new_user.id, "role": data["role"]}
-    key = TOKEN_KEY
+    key = settings.TOKEN_KEY
     token = jwt.encode(jwt_body, key, algorithm="HS256")
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'token': token, 'user': data})
 
@@ -203,6 +198,47 @@ def update_user(request):
     user_to_update.password = pbkdf2_sha256.hash(user_to_update.password)
     user_to_update.save()
     data = user_normalizer(user)
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
+
+
+@csrf_exempt
+def update_user(request, user_id):
+    if request.method == 'PATCH':
+        decode = request.body.decode('utf-8')
+        content = json.loads(decode)
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'User not found.'
+            })
+
+        form = UserForm(instance=user, data=content)
+
+        if form.is_valid():
+            update_user = form.save(commit=False)
+            update_user.password = pbkdf2_sha256.hash(update_user.password)
+            update_user.save()
+        else:
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+                'result': 'error',
+                'message': 'Could not save the data',
+                'data': form.errors
+            })
+
+    else:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'Not Allowed',
+            'message': 'Must be a PATCH method',
+        })
+
+    data = user_normalizer(user)
+
     return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
 
 

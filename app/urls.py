@@ -19,12 +19,15 @@ from app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('organization/', include('organization.urls')),
-    path('role/', include('role.urls')),
     path('user/', include('user.urls')),
+    path('role/', include('role.urls')),
+    path('organization/', include('organization.urls')),
     path('user-organization/', include('user_organization.urls')),
-    path('token/', views.send_csrf_token, name="send_csrf_token"),
     path('team/', include('team.urls')),
     path('project/', include('project.urls')),
     path('task_timer/', include('task_timer.urls'))
+    path('task/', include('task.urls')),
+    path('user-task/', include('user_task.urls')),
+    path('token/', views.send_csrf_token, name="send_csrf_token"),
+
 ]
