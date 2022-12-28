@@ -11,12 +11,14 @@ from team.models import UserTeam
 from user.models import User
 from user_organization.models import UserOrganization
 from .models import TaskTimer
+from django.utils import timezone
 # from .models import Task
 from .normalizers import task_timer_normalizer, task_timers_normalizer
-# from .forms import TaskTimerForm
+from .forms import TaskTimerForm
 
 @csrf_exempt
-def get_task_timers(request, task_id):
+def get_task_timers(request):
+
     if request.method != "GET":
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
@@ -68,88 +70,100 @@ def get_task_timers(request, task_id):
     #         return user_team
 
     try:
-        task_timers = TaskTimer.objects.all().filter(task=task_id)
+        #task_timers = TaskTimer.objects.all().filter(task=task_id)
+        task_timers = TaskTimer.objects.all().values()
     except TaskTimer.DoesNotExist:
         return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
 
     data = task_timers_normalizer(task_timers)
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
 
-# class TaskTimerViewSet(viewsets.ModelViewSet):
-#   queryset = TaskTimer.objects.all()
-#   serializer_class = TaskTimerSerializer
+@csrf_exempt
+def start_task_timer(request):
+    if request.method != "POST":
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'Not Allowed',
+            'message': 'Must be a GET method',
+        })
 
-#   @csrf_exempt
-#   def perform_create(self, serializer):
-#     serializer.save()
-#     return JsonResponse({'message': 'Successfully created task'}, status=201)
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(id=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
+        })
 
-#   @csrf_exempt
-#   def perform_update(self, serializer):
-#     serializer.save()
-#     return JsonResponse({'message': 'Task successfully updated'}, status=200)
+    task_timer = TaskTimer(start_time=timezone.now())
+    task_timer.save()
+    return JsonResponse({'message': 'Task time successfully start'}, status=200)
 
-#   @csrf_exempt
-#   def perform_destroy(self, instance):
-#     instance.delete()
-#     return JsonResponse({'message': 'Task deleted successfully'}, status=204)
 
-#   @csrf_exempt
-#   def start(self, request, pk=None):
-#     if request.method == 'POST':
-#       task_timer = self.get_object()
-#       task_timer.start_time = timezone.now()
-#       task_timer.save()
-#       return JsonResponse({'message': 'Task time successfully started'}, status=200)
-#     else:
-#       return JsonResponse({
-#         'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-#         'result': 'Not Allowed',
-#         'message': 'Must be a POST method',
-#       })
+@csrf_exempt
+def stop_task_timer(request, task_timer_id):
+    if request.method != "POST":
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'Not Allowed',
+            'message': 'Must be a GET method',
+        })
+        
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(id=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
+        })
 
-#   @csrf_exempt
-#   def stop(self, request, pk=None):
-#     if request.method == 'POST':
-#       task_timer = self.get_object()
-#       task_timer.end_time = timezone.now()
-#       duration = task_timer.end_time - task_timer.start_time
-#       task_timer.total_time = duration
-#       task_timer.save()
-#       return JsonResponse({'message': 'Successfully stopped task time'}, status=200)
-#     else:
-#       return JsonResponse({
-#         'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-#         'result': 'Not Allowed',
-#         'message': 'Must be a POST method',
-#       })
+    try:
+        task_timer = TaskTimer.objects.get(pk=task_timer_id)
+    except TaskTimer.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'TaskTimer not found.'
+        })
+    task_timer.end_time = timezone.now()
+    duration = task_timer.end_time - task_timer.start_time
+    task_timer.total_time = duration
+    task_timer.save()
+    return JsonResponse({'message': 'Task time successfully stoped'}, status=200)
 
-#   @csrf_exempt
-#   def pause(self, request, pk=None):
-#     if request.method == 'POST':
-#       task_timer = self.get_object()
-#       duration = timezone.now() - task_timer.start_time
-#       task_timer.total_time += duration
-#       task_timer.save()
-#       return JsonResponse({'message': 'Successfully paused task time'}, status=200)
-#     else:
-#        return JsonResponse({
-#         'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-#         'result': 'Not Allowed',
-#         'message': 'Must be a POST method',
-#       })
+@csrf_exempt
+def delete_task_timer(request, task_timer_id):
+    if request.method != "POST":
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'Not Allowed',
+            'message': 'Must be a GET method',
+        })
+        
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        user = User.objects.get(id=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
+        })
 
-#   @csrf_exempt
-#   def resume(self, request, pk=None):
-#     if request.method == 'POST':
-#       task_timer = self.get_object()
-#       task_timer.start_time = timezone.now()
-#       task_timer.save()
-#       return JsonResponse({'message': 'Temps de tâche repris avec succès'}, status=200)
-#     else:
-#        return JsonResponse({
-#         'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-#         'result': 'Not Allowed',
-#         'message': 'Must be a POST method',
-#       })
-      
+    try:
+        task_timer = TaskTimer.objects.get(pk=task_timer_id)
+    except TaskTimer.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'TaskTimer not found.'
+        })
+    task_timer.delete()
+    return JsonResponse({'message': 'Task time successfully deleted'}, status=200)

@@ -10,7 +10,6 @@ def task_timers_normalizer(data):
             'start_time': task_timer['start_time'],
             'end_time': task_timer['end_time'],
             'total_time': task_timer['total_time'],
-            'status': task_timer['status'],
             # 'task': {
             #     'id': task_timer_details.task.id,
             #     'label': task_timer_details.task.name,
@@ -28,7 +27,6 @@ def task_timer_normalizer(data):
         'start_time': data.start_time,
         'end_time': data.end_time,
         'total_time': data.total_time,
-        'status': data.status,
         # 'task': {
         #         'id': data.task.id,
         #         'label': data.task.name,
