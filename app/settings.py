@@ -171,3 +171,5 @@ env = Env()
 env.read_env()
 TOKEN_KEY = env("JWT_TOKEN_KEY")
 
+SWAGGER_YAML_FILE = '../documentation/swagger_documentation.yaml'
+

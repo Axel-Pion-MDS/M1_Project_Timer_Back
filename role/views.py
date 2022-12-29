@@ -23,7 +23,7 @@ def get_roles(request):
     else:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a GET method',
         })
 
@@ -46,7 +46,7 @@ def get_role(request, role_id):
     else:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a GET method',
         })
 
@@ -73,7 +73,7 @@ def add_role(request):
     else:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a POST method',
         })
 
@@ -111,7 +111,7 @@ def update_role(request):
     else:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a PATCH method',
         })
 
@@ -136,7 +136,7 @@ def delete_role(request, role_id):
     else:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a DELETE method',
         })
 

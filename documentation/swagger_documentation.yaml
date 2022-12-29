@@ -1,0 +1,434 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: Project Timer Api Documentation
+    url: https://virtserver.swaggerhub.com/Maengdok/ProjectTimerAPI/1.0.0
+info:
+  version: "1.0.0"
+  title: Project Timer API
+  description: Create and manage task's project inside your organization
+security: []
+paths:
+  /user/:
+    get:
+      tags:
+        - User
+      description: Returns all users
+      responses:
+        '200':
+          description: All users response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/user/{user_id}':
+    get:
+      tags:
+        - User
+      description: Returns a user from it's ID
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFound'
+        '404':
+          description: User Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  "/user/login":
+    post:
+      tags:
+        - User
+      description: Allow a user to connect to the application
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserFormLogIn'
+      responses:
+        '200':
+          description: User connected successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogInSuccessResponse'
+        '405':
+          description: User credentials invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogInFailureResponse'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  "/user/add":
+    post:
+      tags:
+        - User
+      description: Allow a user to create an account
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserFormAdd'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAddSuccess'
+        '405':
+          description: Account already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAlreadyExists'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  "/user/update":
+    patch:
+      tags:
+        - User
+      description: Allow a user to update its own profile
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserFormUpdate'
+      responses:
+        '201':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserUpdateSuccess'
+        '403':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '404':
+          description: User not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Forbidden request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenUserUpdate'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  "/user/delete/{user_id}":
+    delete:
+      tags:
+        - User
+      description: Delete a user
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDeleteSuccess'
+        '403':
+          description: Forbidden request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenUserDelete'
+        '404':
+          description: User not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+components:
+  securitySchemes:
+    JwtToken:
+      description: Jwt Token example.
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    NotAllowed:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+      description: Response shown on a not allowed request.
+    NotAllowedJwt:
+      description: Response shown on a request with wrong JWT.
+      type: object
+      example: {
+          "code": 405,
+          "result": "error",
+          "message": "An error has occurred while decoding the JWT Token."
+      }
+    ForbiddenUserUpdate:
+      description: Response shown when trying to update a user other than itself.
+      type: object
+      example: {
+          "code": 403,
+          "result": "error",
+          "message": "User can only update its own profile"
+      }
+    ForbiddenUserDelete:
+      description: Response shown when trying to delete a user other than itself.
+      type: object
+      example: {
+          "code": 403,
+          "result": "error",
+          "message": "User can only delete its own profile"
+      }
+    Forbidden:
+      description: Response shown on a forbidden request.
+      type: object
+      example:
+    InternalServerError:
+      description: Response shown on a POST/PATCH request that could not have been saved.
+      type: object
+      example: {
+          "code": 500,
+          "result": "error",
+          "message": "Could not save the data",
+          "data": "firstname required"
+      }
+    UserFormLogIn:
+        description: Body request for User
+        type: object
+        properties:
+          email:
+            type: string
+            default: test@gmail.com
+          password:
+            type: string
+            default: test
+    UserFormAdd:
+        description: Body request for User
+        type: object
+        properties:
+          firstname:
+            type: string
+            default: Axel
+          lastname:
+            type: string
+            default: Pion
+          email:
+            type: string
+            default: test@gmail.com
+          password:
+            type: string
+            default: test
+    UserFormUpdate:
+        description: Body request for User
+        type: object
+        properties:
+          id:
+            type: integer
+            default: 1
+          firstname:
+            type: string
+            default: Axel
+          lastname:
+            type: string
+            default: Pion
+          email:
+            type: string
+            default: test@gmail.com
+          password:
+            type: string
+            default: test
+    UserNotFound:
+      description: Error shown when a user can not be found.
+      type: object
+      example: {
+          "code": 404,
+          "result": "error",
+          "message": "User not found."
+      }
+    UserFound:
+      description: Response shown when a user has been found.
+      type: object
+      example: {
+                "code": 200,
+                "result": "success",
+                "data": {
+                    "id": 2,
+                    "firstname": "Axel",
+                    "lastname": "Pion",
+                    "email": "pionaxel@gmail.com",
+                    "created_at": "2022-12-27T13:45:20.311Z",
+                    "updated_at": "2022-12-27T13:45:20.311Z",
+                    "role": {
+                        "id": 1,
+                        "label": "ROLE_USER"
+                    }
+                }
+            }
+    UsersFound:
+      description: Response shown when users has been found.
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+            {
+                "id": 2,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pionaxel@gmail.com",
+                "created_at": "2022-12-27T13:45:20.311Z",
+                "updated_at": "2022-12-27T13:45:20.311Z",
+                "role": {
+                    "id": 1,
+                    "label": "ROLE_USER"
+                }
+            },
+            {
+              "id": 3,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "test@gmail.com",
+              "created_at": "2022-12-27T13:45:37.089Z",
+              "updated_at": "2022-12-27T13:45:37.089Z",
+              "role": {
+                  "id": 1,
+                  "label": "ROLE_USER"
+              }
+          },
+        ]
+      }
+    LogInSuccessResponse:
+      description: Response shown when a user successfully log in.
+      type: object
+      example: {
+          "code": 200,
+          "result": "success",
+          "token": 'JwtToken',
+          "user": {
+              "id": 2,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pionaxel@gmail.com",
+              "created_at": "2022-12-27T13:45:20.311Z",
+              "updated_at": "2022-12-27T13:45:20.311Z",
+              "role": {
+                  "id": 1,
+                  "label": "ROLE_USER"
+              }
+          }
+      }
+    LogInFailureResponse:
+      description: Response shown when a user fails to log in.
+      type: object
+      example: {
+          "code": 404,
+          "result": "error",
+          "message": "Incorrect Credentials"
+      }
+    UserAddSuccess:
+      description: Response shown when a user has successfully been created.
+      type: object
+      example: {
+          "code": 201,
+          "result": "success",
+          "token": "JwtToken",
+          "user": {
+              "id": 5,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "plop@gmail.com",
+              "created_at": "2022-12-29T18:01:34.224Z",
+              "updated_at": "2022-12-29T18:01:34.224Z",
+              "role": {
+                  "id": 1,
+                  "label": "ROLE_USER"
+              }
+          }
+      }
+    UserAlreadyExists:
+      description: Response shown when a user tries to create a account with an email that is already used for another account.
+      type: object
+      example: {
+          'code': 405,
+          'result': 'error',
+          'message': 'This user account already exists',
+      }
+    UserUpdateSuccess:
+      description: Response shown when a user has successfully updated its account
+      type: object
+      example: {
+          "code": 201,
+          "result": "success",
+          "data": {
+              "id": 2,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pionaxel@gmail.com",
+              "created_at": "2022-12-27T13:45:20.311Z",
+              "updated_at": "2022-12-29T18:33:45.185Z",
+              "role": {
+                  "id": 1,
+                  "label": "ROLE_USER"
+              }
+          }
+      }
+    UserDeleteSuccess:
+      description: Response shown when a user has successfully delete its account
+      type: object
+      example: {
+        'code': 200,
+        'result': 'success',
+        'data': []
+      }

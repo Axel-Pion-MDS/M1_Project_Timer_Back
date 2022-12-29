@@ -4,6 +4,7 @@ import json
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
+from rest_framework.decorators import api_view
 
 from user.models import User
 from user_organization.forms import UserOrganizationForm
@@ -27,7 +28,7 @@ def get_organizations(request):
     else:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a GET method',
         })
 
@@ -50,7 +51,7 @@ def get_organization(request, organization_id):
     else:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a GET method',
         })
 
@@ -70,6 +71,13 @@ def add_organization(request):
 
             authorization = request.headers.get('Authorization')
             jwt_content = tokenDecode.decode_token(authorization)
+            if isinstance(jwt_content, int):
+                return JsonResponse({
+                    'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                    'result': 'error',
+                    'message': 'An error has occurred while decoding the JWT Token.'
+                    if jwt_content == 1 else 'JWT Token invalid.'
+                })
 
             try:
                 user = User.objects.get(pk=jwt_content.get('id'))
@@ -108,7 +116,7 @@ def add_organization(request):
     else:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a POST method',
         })
 
@@ -124,6 +132,13 @@ def update_organization(request):
 
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
+        if isinstance(jwt_content, int):
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': 'An error has occurred while decoding the JWT Token.'
+                if jwt_content == 1 else 'JWT Token invalid.'
+            })
 
         try:
             user = User.objects.get(pk=jwt_content.get('id'))
@@ -174,7 +189,7 @@ def update_organization(request):
     else:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a PATCH method',
         })
 
@@ -188,6 +203,13 @@ def delete_organization(request, organization_id):
     if request.method == 'DELETE':
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
+        if isinstance(jwt_content, int):
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': 'An error has occurred while decoding the JWT Token.'
+                if jwt_content == 1 else 'JWT Token invalid.'
+            })
 
         try:
             user = User.objects.get(pk=jwt_content.get('id'))
@@ -227,7 +249,7 @@ def delete_organization(request, organization_id):
     else:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a DELETE method',
         })
 

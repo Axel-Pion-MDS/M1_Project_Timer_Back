@@ -22,13 +22,21 @@ def get_user_tasks(request):
     if request.method != 'GET':
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a GET method',
         })
 
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
+        if isinstance(jwt_content, int):
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': 'An error has occurred while decoding the JWT Token.'
+                if jwt_content == 1 else 'JWT Token invalid.'
+            })
+
         user = User.objects.get(id=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
@@ -51,13 +59,21 @@ def get_user_task(request, user_task_id):
     if request.method != "GET":
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a GET method',
         })
 
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
+        if isinstance(jwt_content, int):
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': 'An error has occurred while decoding the JWT Token.'
+                if jwt_content == 1 else 'JWT Token invalid.'
+            })
+
         User.objects.get(id=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
@@ -84,13 +100,21 @@ def get_users_from_task(request, task_id):
     if request.method != "GET":
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a GET method',
         })
 
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
+        if isinstance(jwt_content, int):
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': 'An error has occurred while decoding the JWT Token.'
+                if jwt_content == 1 else 'JWT Token invalid.'
+            })
+
         user = User.objects.get(id=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
@@ -126,7 +150,7 @@ def add_user_to_task(request):
     if request.method != "POST":
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a POST method',
         })
     body = request.body.decode('utf-8')
@@ -135,6 +159,13 @@ def add_user_to_task(request):
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
+        if isinstance(jwt_content, int):
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': 'An error has occurred while decoding the JWT Token.'
+                if jwt_content == 1 else 'JWT Token invalid.'
+            })
         user = User.objects.get(id=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
@@ -256,6 +287,14 @@ def delete_user_from_task(request):
         try:
             authorization = request.headers.get('Authorization')
             jwt_content = tokenDecode.decode_token(authorization)
+            if isinstance(jwt_content, int):
+                return JsonResponse({
+                    'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                    'result': 'error',
+                    'message': 'An error has occurred while decoding the JWT Token.'
+                    if jwt_content == 1 else 'JWT Token invalid.'
+                })
+
             user = User.objects.get(id=jwt_content.get('id'))
         except User.DoesNotExist:
             return JsonResponse({
@@ -345,7 +384,7 @@ def delete_user_from_task(request):
     else:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a DELETE method',
         })
 
