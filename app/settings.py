@@ -46,9 +46,9 @@ INSTALLED_APPS = [
     'organization.apps.OrganizationConfig',
     'user_organization.apps.UserOrganizationConfig',
     'project.apps.ProjectConfig',
-    'task_timer.apps.TaskTimerConfig'
     'team.apps.TeamConfig',
     'task.apps.TaskConfig',
+    'task_timer.apps.TaskTimerConfig',
     'user_task.apps.UserTaskConfig',
 
 ]

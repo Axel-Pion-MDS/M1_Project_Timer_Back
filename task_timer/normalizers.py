@@ -10,11 +10,11 @@ def task_timers_normalizer(data):
             'start_time': task_timer['start_time'],
             'end_time': task_timer['end_time'],
             'total_time': task_timer['total_time'],
-            # 'task': {
-            #     'id': task_timer_details.task.id,
-            #     'label': task_timer_details.task.name,
-            #     'description': task_timer_details.task.description,
-            # } if task_timer_details.task else 'null'
+            'task': {
+                'id': task_timer_details.task.id,
+                'label': task_timer_details.task.label,
+                'description': task_timer_details.task.description,
+            } if task_timer_details.task else 'null'
         }
 
         result.append(item)
@@ -27,10 +27,10 @@ def task_timer_normalizer(data):
         'start_time': data.start_time,
         'end_time': data.end_time,
         'total_time': data.total_time,
-        # 'task': {
-        #         'id': data.task.id,
-        #         'label': data.task.name,
-        #         'description': data.task.description,
-        # } if data.task else 'null'
+        'task': {
+            'id': data.task.id,
+            'label': data.task.label,
+            'description': data.task.description,
+        } if data.task else 'null'
     }
 

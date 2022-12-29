@@ -8,5 +8,6 @@ class TaskTimerForm(forms.ModelForm):
         fields = (
             'start_time',
             'end_time',
-            'total_time'
+            'total_time',
+            'task'
         )
