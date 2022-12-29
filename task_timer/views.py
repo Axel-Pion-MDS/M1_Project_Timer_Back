@@ -37,7 +37,7 @@ def get_task_timers(request,task_id):
             'message': 'User not found.'
         })
 
-    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, task.project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
@@ -56,7 +56,7 @@ def get_task_timers(request,task_id):
         return has_role
 
     if role_id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']:
-        user_team = verify_user_in_model.get_user_team_from_project(user, project)
+        user_team = verify_user_in_model.get_user_team_from_project(user, task.project)
         if not isinstance(user_team, UserTeam):
             return user_team
 
@@ -155,7 +155,7 @@ def stop_task_timer(request, task_timer_id):
             'message': 'User not found.'
         })
 
-    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, task.project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
@@ -174,7 +174,7 @@ def stop_task_timer(request, task_timer_id):
         return has_role
 
     if role_id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']:
-        user_team = verify_user_in_model.get_user_team_from_project(user, project)
+        user_team = verify_user_in_model.get_user_team_from_project(user, task.project)
         if not isinstance(user_team, UserTeam):
             return user_team
 
@@ -222,7 +222,7 @@ def delete_task_timer(request, task_timer_id):
             'message': 'User not found.'
         })
 
-    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, task.project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
@@ -241,7 +241,7 @@ def delete_task_timer(request, task_timer_id):
         return has_role
 
     if role_id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']:
-        user_team = verify_user_in_model.get_user_team_from_project(user, project)
+        user_team = verify_user_in_model.get_user_team_from_project(user, task.project)
         if not isinstance(user_team, UserTeam):
             return user_team
 
