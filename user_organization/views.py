@@ -16,75 +16,72 @@ from .forms import UserOrganizationForm
 
 @csrf_exempt
 def get_user_organizations(request):
-    if request.method == 'GET':
-        user_organizations = UserOrganization.objects.all().values()
-
-        if user_organizations:
-            data = user_organizations_normalizer(user_organizations)
-        else:
-            return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
-    else:
+    if request.method != 'GET':
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
             'result': 'error',
             'message': 'Must be a GET method',
         })
 
+    try:
+        user_organizations = UserOrganization.objects.all().values()
+    except UserOrganization.DoesNotExist:
+        return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': []})
+
+    data = user_organizations_normalizer(user_organizations)
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
 
 
 @csrf_exempt
 def get_user_organization(request, user_organization_id):
-    if request.method == "GET":
-        try:
-            user_organization = UserOrganization.objects.get(pk=user_organization_id)
-        except UserOrganization.DoesNotExist:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'User Organization not found.'
-            })
-
-        data = user_organization_normalizer(user_organization)
-    else:
+    if request.method != "GET":
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
             'result': 'error',
             'message': 'Must be a GET method',
         })
 
+    try:
+        user_organization = UserOrganization.objects.get(pk=user_organization_id)
+    except UserOrganization.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User Organization not found.'
+        })
+
+    data = user_organization_normalizer(user_organization)
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
 
 
 @csrf_exempt
 def get_users_from_organization(request, organization_id):
-    if request.method == "GET":
-        try:
-            organization = Organization.objects.get(pk=organization_id)
-        except Organization.DoesNotExist:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'Organization not found.'
-            })
-
-        try:
-            user_organization = UserOrganization.objects.filter(organization=organization_id)
-        except UserOrganization.DoesNotExist:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'User Organization not found.'
-            })
-
-        data = users_from_organization_normalizer(user_organization, organization)
-    else:
+    if request.method != "GET":
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
             'result': 'error',
             'message': 'Must be a GET method',
         })
 
+    try:
+        organization = Organization.objects.get(pk=organization_id)
+    except Organization.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Organization not found.'
+        })
+
+    try:
+        user_organization = UserOrganization.objects.filter(organization=organization_id)
+    except UserOrganization.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User Organization not found.'
+        })
+
+    data = users_from_organization_normalizer(user_organization, organization)
     return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
 
 

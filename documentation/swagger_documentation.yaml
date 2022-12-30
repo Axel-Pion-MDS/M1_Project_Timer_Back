@@ -488,6 +488,172 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAllowedJwt'
+  /user-organization/:
+    get:
+      tags:
+        - User Organization
+      description: Returns all user_organizations
+      responses:
+        '200':
+          description: All user_organizations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationsSuccess'
+  '/user-organization/{user_organization_id}':
+    get:
+      tags:
+        - User Organization
+      description: Returns an user_organization from its ID
+      parameters:
+        - name: user_organization_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: UserOrganization's details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationSuccess'
+        '404':
+          description: UserOrganization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationNotFound'
+  '/user-organization/users/{organization_id}':
+    get:
+      tags:
+        - User Organization
+      description: Returns all members of an organization from its ID
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Organization's members details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationSuccess'
+        '404':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+  '/user-organization/add':
+    post:
+      tags:
+        - User Organization
+      description: Allow an organization's owner or co-owner to add users to their organization
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserOrganizationFormAdd'
+      responses:
+        '201':
+          description: UserOrganization created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationAddSuccess'
+        '403':
+          description: Can not invite yourself
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationForbidden'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/user-organization/update':
+    patch:
+      tags:
+        - User Organization
+      description: Allow an organization's owner or co-owner to update user's role in their organization
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserOrganizationFormUpdate'
+      responses:
+        '201':
+          description: User role in Organization updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationAddSuccess'
+        '403':
+          description: Can not update yourself
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationForbidden'
+        '404':
+          description: User not found in Organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInOrganizationNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/user-organization/delete':
+    delete:
+      tags:
+        - User Organization
+      description: Allow an organization's owner or co-owner to delete a user from their organization
+      responses:
+        '200':
+          description: User successfully removed from Organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationDeleteSuccess'
+        '403':
+          description: Can not delete yourself
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationForbidden'
+        '404':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
 components:
   securitySchemes:
     JwtToken:
@@ -744,42 +910,42 @@ components:
       description: Response shown when roles has been found.
       type: object
       example: {
-    "code": 200,
-    "result": "success",
-    "data": [
-              {
-                  "id": 1,
-                  "label": "ROLE_USER"
-              },
-              {
-                  "id": 2,
-                  "label": "ROLE_ADMIN"
-              },
-              {
-                  "id": 3,
-                  "label": "ROLE_SUPER_ADMIN"
-              },
-              {
-                  "id": 4,
-                  "label": "ROLE_ORGANIZATION_OWNER"
-              },
-              {
-                  "id": 5,
-                  "label": "ROLE_ORGANIZATION_CO_OWNER"
-              },
-              {
-                  "id": 6,
-                  "label": "ROLE_ORGANIZATION_MEMBER"
-              },
-              {
-                  "id": 7,
-                  "label": "ROLE_TEAM_LEADER"
-              },
-              {
-                  "id": 8,
-                  "label": "ROLE_TEAM_MEMBER"
-              }
-          ]
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 1,
+            "label": "ROLE_USER"
+          },
+          {
+            "id": 2,
+            "label": "ROLE_ADMIN"
+          },
+          {
+            "id": 3,
+            "label": "ROLE_SUPER_ADMIN"
+          },
+          {
+            "id": 4,
+            "label": "ROLE_ORGANIZATION_OWNER"
+          },
+          {
+            "id": 5,
+            "label": "ROLE_ORGANIZATION_CO_OWNER"
+          },
+          {
+            "id": 6,
+            "label": "ROLE_ORGANIZATION_MEMBER"
+          },
+          {
+            "id": 7,
+            "label": "ROLE_TEAM_LEADER"
+          },
+          {
+            "id": 8,
+            "label": "ROLE_TEAM_MEMBER"
+          }
+        ]
       }
     RoleSuccess:
       description: Response shown when a role has been found.
@@ -931,4 +1097,253 @@ components:
         'code': 404,
         'result': 'error',
         'message': 'Organization not found.'
+      }
+    UserOrganizationFormAdd:
+      description: Body request for UserOrganization creation
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserOrganizationUsersProperty'
+        organization:
+          type: integer
+          default: 1
+    UserOrganizationFormUpdate:
+      description: Body request for UserOrganization creation
+      type: object
+      properties:
+        user:
+          type: string
+          default: "test@gmail.com"
+        organization:
+          type: integer
+          default: 1
+        role:
+          type: integer
+          default: 6
+    UserOrganizationsSuccess:
+      description: Response shown when user_organizations have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 1,
+            "organization": {
+              "id": 1,
+              "label": "Evoli"
+            },
+            "users": [
+              {
+                "id": 2,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pionaxel@gmail.com",
+                "role": {
+                  "id": 4,
+                  "label": "ROLE_ORGANIZATION_OWNER"
+                }
+              },
+              {
+                "id": 3,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "test@gmail.com",
+                "role": {
+                  "id": 6,
+                  "label": "ROLE_ORGANIZATION_MEMBER"
+                }
+              },
+              {
+                "id": 4,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pouet@gmail.com",
+                "role": {
+                  "id": 5,
+                  "label": "ROLE_ORGANIZATION_CO_OWNER"
+                }
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "organization": {
+              "id": 2,
+              "label": "Aquali"
+            },
+            "users": [
+              {
+                "id": 2,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pionaxel@gmail.com",
+                "role": {
+                  "id": 4,
+                  "label": "ROLE_ORGANIZATION_OWNER"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    UserOrganizationSuccess:
+      description: Response shown when an user_organization has been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "organization": {
+            "id": 1,
+            "label": "MaengdokOrga"
+          },
+          "user": {
+            "id": 2,
+            "firstname": "Axel",
+            "lastname": "Pion",
+            "email": "pionaxel@gmail.com",
+            "role": {
+              "id": 4,
+              "label": "ROLE_ORGANIZATION_OWNER"
+            }
+          }
+        }
+      }
+    OrganizationMembersSuccess:
+      description: Response shown when members of an organization have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "organization": {
+              "id": 1,
+              "label": "Evoli"
+            }
+          },
+          {
+            "users": [
+              {
+                "id": 2,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pionaxel@gmail.com",
+                "role": {
+                  "id": 4,
+                  "label": "ROLE_ORGANIZATION_OWNER"
+                }
+              },
+              {
+                "id": 3,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "test@gmail.com",
+                "role": {
+                  "id": 6,
+                  "label": "ROLE_ORGANIZATION_MEMBER"
+                }
+              },
+              {
+                "id": 4,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pouet@gmail.com",
+                "role": {
+                  "id": 5,
+                  "label": "ROLE_ORGANIZATION_CO_OWNER"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    UserOrganizationAddSuccess:
+      description: Response shown when users have been successfully added to an organization
+      type: object
+      example: {
+        "code": 201,
+        "result": "success",
+        "data": {
+          "id": 3,
+          "organization": {
+            "id": 1,
+            "label": "Evoli"
+          },
+          "users": [
+            {
+              "id": 2,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pionaxel@gmail.com",
+              "role": {
+                "id": 4,
+                "label": "ROLE_ORGANIZATION_OWNER"
+              }
+            },
+            {
+              "id": 3,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "test@gmail.com",
+              "role": {
+                "id": 6,
+                "label": "ROLE_ORGANIZATION_MEMBER"
+              }
+            },
+            {
+              "id": 4,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pouet@gmail.com",
+              "role": {
+                "id": 5,
+                "label": "ROLE_ORGANIZATION_CO_OWNER"
+              }
+            }
+          ]
+        }
+      }
+    UserOrganizationDeleteSuccess:
+      description: Response shown when a user has been successfully removed from an organization
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [ ]
+      }
+    UserOrganizationNotFound:
+      description: Response shown when a user has not been found from a user_organization
+      type: object
+      example: {
+        "code": 404,
+        "result": "error",
+        'message': 'User Organization not found.'
+      }
+    UserInOrganizationNotFound:
+      description: Response shown when a user has not been found from in organization
+      type: object
+      example: {
+        "code": 404,
+        "result": "error",
+        "message": "The User is not present in this Organization."
+      }
+    UserOrganizationForbidden:
+      description: Response shown when a user tries to invite himself in its organization
+      type: object
+      example: {
+        'code': 403,
+        'result': 'error',
+        'message': 'Can not invite yourself.'
+      }
+    UserOrganizationUsersProperty:
+      description: Example of users array that should be sent with the body in /user-organization/add
+      type: object
+      example: {
+        "email": "test@gmail.com",
+        "role": 6
       }
