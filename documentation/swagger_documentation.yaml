@@ -346,6 +346,148 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAllowedJwt'
+  /organization/:
+    get:
+      tags:
+        - Organization
+      description: Returns all organizations
+      responses:
+        '200':
+          description: All organizations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationsSuccess'
+  '/organization/{organization_id}':
+    get:
+      tags:
+        - Organization
+      description: Returns an organization from its ID
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Organization's details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationSuccess'
+        '404':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+  '/organization/add':
+    post:
+      tags:
+        - Organization
+      description: Allow a user to create an organization and automatically becomes the owner
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/OrganizationFormAdd'
+      responses:
+        '201':
+          description: Organization created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationAddSuccess'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/organization/update':
+    patch:
+      tags:
+        - Organization
+      description: Allow a user that owns or that is a co-owner of an organization to update it
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/OrganizationFormUpdate'
+      responses:
+        '201':
+          description: Organization updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/organization/delete/{organization_id}':
+    delete:
+      tags:
+        - Organization
+      description: Allow a user with the ROLE_ORGANIZATION_OWNER to delete its organization
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Organization's details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDeleteSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
 components:
   securitySchemes:
     JwtToken:
@@ -651,7 +793,7 @@ components:
           }
       }
     RoleFormAdd:
-      description: Body request for Role
+      description: Body request for Role creation
       type: object
       properties:
         label:
@@ -669,7 +811,7 @@ components:
         }
       }
     RoleFormUpdate:
-      description: Response shown when a role has been successfully updated
+      description: Body request for Role update
       type: object
       properties:
         id:
@@ -685,4 +827,108 @@ components:
         'code': 200,
         'result': 'success',
         'data': []
+      }
+    OrganizationFormAdd:
+      description: Body request for organization creation
+      type: object
+      properties:
+        label:
+          type: string
+          default: Your organization's name
+        description:
+          type: string
+          default: Your organization's description
+    OrganizationFormUpdate:
+      description: Body request for organization update
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 1
+        label:
+          type: string
+          default: Your organization's name
+        description:
+          type: string
+          default: Your organization's description
+    OrganizationsSuccess:
+      description: Response shown when organizations have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 1,
+            "label": "Evoli",
+            "description": "Blablou",
+            "created_at": "2022-12-27T13:45:55.234Z",
+            "updated_at": "2022-12-27T13:45:55.234Z",
+            "projects": [
+              {
+                "id": 1,
+                "label": "Evoluer en Mentali"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "label": "Aquali",
+            "description": "Blablou",
+            "created_at": "2022-12-28T13:58:04.810Z",
+            "updated_at": "2022-12-28T13:58:04.810Z",
+            "projects": "null"
+          },
+        ]
+      }
+    OrganizationSuccess:
+      description: Response shown when an organization has been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "label": "Evoli",
+          "description": "Blablou",
+          "created_at": "2022-12-27T13:45:55.234Z",
+          "updated_at": "2022-12-27T13:45:55.234Z",
+          "projects": [
+            {
+              "id": 1,
+              "label": "Evoluer en Mentali"
+            }
+          ]
+        }
+      }
+    OrganizationAddSuccess:
+      description: Response shown when an organization has been successfully created
+      type: object
+      example: {
+        'code': 201,
+        'result': 'success',
+        'data': {
+          'id': 1,
+          'label': 'Evoli',
+          'description': 'Blablou',
+          'created_at': '2022-12-27T13:45:55.234Z',
+          'updated_at': '2022-12-27T13:45:55.234Z',
+          'projects': 'null'
+        }
+      }
+    OrganizationDeleteSuccess:
+      description: Response shown when an organization has been successfully deleted
+      type: object
+      example: {
+        'code': 200,
+        'result': 'success',
+        'data': []
+      }
+    OrganizationNotFound:
+      description: Response shown when an organization has not been found
+      type: object
+      example: {
+        'code': 404,
+        'result': 'error',
+        'message': 'Organization not found.'
       }
