@@ -31,7 +31,7 @@ paths:
     get:
       tags:
         - User
-      description: Returns a user from it's ID
+      description: Returns a user from its ID
       parameters:
         - name: user_id
           in: path
@@ -192,6 +192,160 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAllowedJwt'
+  /role/:
+    get:
+      tags:
+        - Role
+      description: Returns all roles
+      responses:
+        '200':
+          description: All roles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RolesSuccess'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/role/{role_id}':
+    get:
+      tags:
+        - Role
+      description: Returns a role from its ID
+      parameters:
+        - name: role_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Role details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleSuccess'
+        '404':
+          description: Role not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/role/add':
+    post:
+      tags:
+        - Role
+      description: Allow user with the role 'ROLE_ADMIN' or 'ROLE_SUPER_ADMIN' to create role
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/RoleFormAdd'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/role/update':
+    patch:
+      tags:
+        - Role
+      description: Allow user with the role 'ROLE_ADMIN' or 'ROLE_SUPER_ADMIN' to update a role
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/RoleFormUpdate'
+      responses:
+        '201':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/role/delete/{role_id}':
+    delete:
+      tags:
+        - Role
+      description: Allow user with the role 'ROLE_ADMIN' or 'ROLE_SUPER_ADMIN' to delete a role
+      parameters:
+        - name: role_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Role deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleDeleteSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: Role not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
 components:
   securitySchemes:
     JwtToken:
@@ -234,7 +388,11 @@ components:
     Forbidden:
       description: Response shown on a forbidden request.
       type: object
-      example:
+      example: {
+        "code": 403,
+        "result": "error",
+        "message": "You do not have the right privileges to access this resource."
+      }
     InternalServerError:
       description: Response shown on a POST/PATCH request that could not have been saved.
       type: object
@@ -426,6 +584,102 @@ components:
       }
     UserDeleteSuccess:
       description: Response shown when a user has successfully delete its account
+      type: object
+      example: {
+        'code': 200,
+        'result': 'success',
+        'data': []
+      }
+    RoleNotFound:
+      description: Response shown when a role has not been found.
+      type: object
+      example: {
+          "code": 404,
+          "result": "error",
+          "message": "Role not found."
+      }
+    RolesSuccess:
+      description: Response shown when roles has been found.
+      type: object
+      example: {
+    "code": 200,
+    "result": "success",
+    "data": [
+              {
+                  "id": 1,
+                  "label": "ROLE_USER"
+              },
+              {
+                  "id": 2,
+                  "label": "ROLE_ADMIN"
+              },
+              {
+                  "id": 3,
+                  "label": "ROLE_SUPER_ADMIN"
+              },
+              {
+                  "id": 4,
+                  "label": "ROLE_ORGANIZATION_OWNER"
+              },
+              {
+                  "id": 5,
+                  "label": "ROLE_ORGANIZATION_CO_OWNER"
+              },
+              {
+                  "id": 6,
+                  "label": "ROLE_ORGANIZATION_MEMBER"
+              },
+              {
+                  "id": 7,
+                  "label": "ROLE_TEAM_LEADER"
+              },
+              {
+                  "id": 8,
+                  "label": "ROLE_TEAM_MEMBER"
+              }
+          ]
+      }
+    RoleSuccess:
+      description: Response shown when a role has been found.
+      type: object
+      example: {
+          "code": 200,
+          "result": "success",
+          "data": {
+              "id": 1,
+              "label": "ROLE_USER"
+          }
+      }
+    RoleFormAdd:
+      description: Body request for Role
+      type: object
+      properties:
+        label:
+          type: string
+          default: ROLE_USER
+    RoleAddSuccess:
+      description: Response shown when a role has been successfully created.
+      type: object
+      example: {
+        'code': 200,
+        'result': 'success',
+        'data': {
+          "id": 1,
+          "label": "ROLE_USER"
+        }
+      }
+    RoleFormUpdate:
+      description: Response shown when a role has been successfully updated
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 1
+        label:
+          type: string
+          default: "ROLE_ADMIN"
+    RoleDeleteSuccess:
+      description: Response shown when a role has been successfully deleted
       type: object
       example: {
         'code': 200,
