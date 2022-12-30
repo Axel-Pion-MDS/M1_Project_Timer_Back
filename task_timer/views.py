@@ -12,6 +12,7 @@ from user.models import User
 from user_organization.models import UserOrganization
 from .models import TaskTimer
 from task.models import Task
+from project.models import Project
 from django.utils import timezone
 from .normalizers import task_timer_normalizer, task_timers_normalizer
 from .forms import TaskTimerForm
@@ -37,7 +38,25 @@ def get_task_timers(request,task_id):
             'message': 'User not found.'
         })
 
-    user_organization = verify_user_in_model.get_user_organization_from_project(user, task.project)
+    try:
+        task = Task.objects.get(pk=task_id)
+    except Task.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Task not found.'
+        })
+    
+    try:
+        project = Project.objects.get(pk=task.project.id)
+    except Project.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Project not found.'
+        })
+
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
@@ -56,18 +75,9 @@ def get_task_timers(request,task_id):
         return has_role
 
     if role_id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']:
-        user_team = verify_user_in_model.get_user_team_from_project(user, task.project)
+        user_team = verify_user_in_model.get_user_team_from_project(user, project)
         if not isinstance(user_team, UserTeam):
             return user_team
-
-    try:
-        task = Task.objects.get(pk=task_id)
-    except Task.DoesNotExist:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-            'result': 'error',
-            'message': 'Task not found.'
-        })
 
     try:
         task_timers = TaskTimer.objects.all().filter(task=task_id)
@@ -106,8 +116,18 @@ def start_task_timer(request, task_id):
             'message': 'Task not found.'
         })
 
+    try:
+        project = Project.objects.get(pk=task.project.id)
+    except Project.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Project not found.'
+        })
+    
+
     # Vérifie si l'utilisateur a accès à la tâche
-    user_organization = verify_user_in_model.get_user_organization_from_project(user, task.project)
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
@@ -126,7 +146,7 @@ def start_task_timer(request, task_id):
         return has_role
 
     if role_id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']:
-        user_team = verify_user_in_model.get_user_team_from_project(user, task.project)
+        user_team = verify_user_in_model.get_user_team_from_project(user, project)
         if not isinstance(user_team, UserTeam):
             return user_team
 
@@ -155,7 +175,34 @@ def stop_task_timer(request, task_timer_id):
             'message': 'User not found.'
         })
 
-    user_organization = verify_user_in_model.get_user_organization_from_project(user, task.project)
+    try:
+        task_timer = TaskTimer.objects.get(pk=task_timer_id)
+    except TaskTimer.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'TaskTimer not found.'
+        })
+
+    try:
+        task = Task.objects.get(id=task_timer.task.id)
+    except Task.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Task not found.'
+        })
+
+    try:
+        project = Project.objects.get(pk=task.project.id)
+    except Project.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Project not found.'
+        })
+
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
@@ -174,27 +221,9 @@ def stop_task_timer(request, task_timer_id):
         return has_role
 
     if role_id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']:
-        user_team = verify_user_in_model.get_user_team_from_project(user, task.project)
+        user_team = verify_user_in_model.get_user_team_from_project(user, project)
         if not isinstance(user_team, UserTeam):
             return user_team
-
-    try:
-        task_timer = TaskTimer.objects.get(pk=task_timer_id)
-    except TaskTimer.DoesNotExist:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-            'result': 'error',
-            'message': 'TaskTimer not found.'
-        })
-
-    try:
-        task = Task.objects.get(id=task_timer.task_id)
-    except Task.DoesNotExist:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-            'result': 'error',
-            'message': 'Task not found.'
-        })
 
     task_timer.end_time = timezone.now()
     duration = task_timer.end_time - task_timer.start_time
@@ -222,7 +251,34 @@ def delete_task_timer(request, task_timer_id):
             'message': 'User not found.'
         })
 
-    user_organization = verify_user_in_model.get_user_organization_from_project(user, task.project)
+    try:
+        task_timer = TaskTimer.objects.get(pk=task_timer_id)
+    except TaskTimer.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'TaskTimer not found.'
+        })
+
+    try:
+        task = Task.objects.get(id=task_timer.task.id)
+    except Task.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Task not found.'
+        })
+
+    try:
+        project = Project.objects.get(pk=task.project.id)
+    except Project.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Project not found.'
+        })
+
+    user_organization = verify_user_in_model.get_user_organization_from_project(user, project)
     if not isinstance(user_organization, UserOrganization):
         return user_organization
 
@@ -241,27 +297,9 @@ def delete_task_timer(request, task_timer_id):
         return has_role
 
     if role_id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']:
-        user_team = verify_user_in_model.get_user_team_from_project(user, task.project)
+        user_team = verify_user_in_model.get_user_team_from_project(user, project)
         if not isinstance(user_team, UserTeam):
             return user_team
-
-    try:
-        task_timer = TaskTimer.objects.get(pk=task_timer_id)
-    except TaskTimer.DoesNotExist:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-            'result': 'error',
-            'message': 'TaskTimer not found.'
-        })
-
-    try:
-        task = Task.objects.get(id=task_timer.task_id)
-    except Task.DoesNotExist:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-            'result': 'error',
-            'message': 'Task not found.'
-        })
 
     task_timer.delete()
     return JsonResponse({'message': 'Task time successfully deleted'}, status=200)
