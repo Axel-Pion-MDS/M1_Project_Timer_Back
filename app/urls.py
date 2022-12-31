@@ -26,6 +26,7 @@ urlpatterns = [
     path('user-organization/', include('user_organization.urls')),
     path('team/', include('team.urls')),
     path('project/', include('project.urls')),
+    path('task_timer/', include('task_timer.urls')),
     path('task/', include('task.urls')),
     path('user-task/', include('user_task.urls')),
     path('token/', views.send_csrf_token, name="send_csrf_token"),

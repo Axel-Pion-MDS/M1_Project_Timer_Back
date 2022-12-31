@@ -48,10 +48,12 @@ INSTALLED_APPS = [
     'role.apps.RoleConfig',
     'organization.apps.OrganizationConfig',
     'user_organization.apps.UserOrganizationConfig',
+    'project.apps.ProjectConfig',
     'team.apps.TeamConfig',
     'task.apps.TaskConfig',
+    'task_timer.apps.TaskTimerConfig',
     'user_task.apps.UserTaskConfig',
-    'project.apps.ProjectConfig',
+
 ]
 
 MIDDLEWARE = [
