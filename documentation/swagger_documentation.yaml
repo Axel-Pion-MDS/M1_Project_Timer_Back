@@ -1038,6 +1038,184 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAllowedJwt'
+  '/task/project/{project_id}':
+    get:
+      tags:
+        - Task
+      description: Returns all Tasks for a Project
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: All Tasks in Project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskProjectTasksSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/task/{task_id}':
+    get:
+      tags:
+        - Task
+      description: Returns a Task from its ID
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Task successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User, Task or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/task/add':
+    post:
+      tags:
+        - Task
+      description: Allow a User that owns or that is a co-owner of an Organization or that has the role TEAM_LEADER in the related Team to create a Task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskFormAdd'
+      responses:
+        '201':
+          description: Task successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/task/update':
+    patch:
+      tags:
+        - Task
+      description: Allow a User that owns or that is a co-owner of an Organization or that has the role TEAM_LEADER in the related Team to update a Task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskFormUpdate'
+      responses:
+        '201':
+          description: Task successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User, Task or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/task/delete/{task_id}':
+    delete:
+      tags:
+        - Task
+      description: Allow a User that owns or that is a co-owner of an Organization or that has the role TEAM_LEADER in the related Team to delete a Task
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Task successfully delete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDeleteSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User, Task or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
 components:
   securitySchemes:
     JwtToken:
@@ -2025,3 +2203,149 @@ components:
           default: 1
         team:
           type: integer
+    TaskProjectTasksSuccess:
+      description: Response shown when a Project's Tasks have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 1,
+            "label": "반짝이는 별이 됐지",
+            "description": "",
+            "provisional_start": "2022-12-26T17:00:00Z",
+            "provisional_end": "2022-12-26T17:20:00Z",
+            "provisional_time": "00:20:00",
+            "is_billable": true,
+            "is_ended": false,
+            "project": {
+              "id": 2,
+              "label": "Freefall"
+            },
+            "created_at": "2022-12-26T11:10:43.614Z",
+            "updated_at": "2022-12-26T11:10:43.614Z"
+          },
+          {
+            "id": 2,
+            "label": "어제의 너를 기억헤",
+            "description": "",
+            "provisional_start": "2022-12-26T17:00:00Z",
+            "provisional_end": "2022-12-26T17:20:00Z",
+            "provisional_time": "00:20:00",
+            "is_billable": true,
+            "is_ended": false,
+            "project": {
+              "id": 2,
+              "label": "Freefall"
+            },
+            "created_at": "2022-12-26T11:23:15.433Z",
+            "updated_at": "2022-12-26T11:23:15.433Z"
+          }
+        ]
+      }
+    TaskSuccess:
+      description: Response shown when a Task has been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 3,
+          "label": "Tie a cherry",
+          "description": "믿지 못 할 것들 다, 눈이 부셔 못보다",
+          "provisional_start": "2022-12-26T17:00:00Z",
+          "provisional_end": "2022-12-26T17:20:00Z",
+          "provisional_time": "00:20:00",
+          "is_billable": true,
+          "is_ended": false,
+          "project": {
+            "id": 2,
+            "label": "Freefall"
+          },
+          "created_at": "2022-12-26T11:23:16.391Z",
+          "updated_at": "2022-12-26T11:23:16.391Z"
+        }
+      }
+    TaskFormAdd:
+      description: Body request for Task creation
+      type: object
+      properties:
+        label:
+          type: string
+          default: Tie a cherry
+        description:
+          type: string
+          default: 믿지 못 할 것들 다, 눈이 부셔 못보다
+        provisional_start:
+          type: string
+          default: 2022-12-26T17:00:00
+        provisional_end:
+          type: string
+          default: 2022-12-26T17:20:00
+        provisional_time:
+          type: string
+          default: 00:20:00
+        is_billable:
+          type: boolean
+          default: True
+        is_ended:
+          type: boolean
+          default: False
+        project:
+          type: integer
+          default: 1
+    TaskAddSuccess:
+      description: Response shown when a Task has been successfully created
+      type: object
+      example: {
+        "code": 201,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "label": "Tie a cherry",
+          "description": "믿지 못 할 것들 다, 눈이 부셔 못보다",
+          "provisional_start": "2022-12-26T17:00:00Z",
+          "provisional_end": "2022-12-26T17:20:00Z",
+          "provisional_time": "00:20:00",
+          "is_billable": true,
+          "is_ended": false,
+          "project": {
+            "id": 1,
+            "label": "Freefall"
+          },
+          "created_at": "2022-12-27T13:58:59.728Z",
+          "updated_at": "2022-12-27T13:58:59.728Z"
+        }
+      }
+    TaskFormUpdate:
+      description: Body request for Task update
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 1
+        label:
+          type: string
+          default: Tie a cherry
+        description:
+          type: string
+          default: 믿지 못 할 것들 다, 눈이 부셔 못보다
+        provisional_start:
+          type: string
+          default: 2022-12-26T17:00:00
+        provisional_end:
+          type: string
+          default: 2022-12-26T17:20:00
+        provisional_time:
+          type: string
+          default: 00:20:00
+        is_billable:
+          type: boolean
+          default: True
+        is_ended:
+          type: boolean
+          default: False
+        project:
+          type: integer
+          default: 1
