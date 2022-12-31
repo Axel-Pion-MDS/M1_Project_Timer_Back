@@ -14,7 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.shortcuts import redirect
+from django.urls import path, include, re_path
 from app import views
 
 urlpatterns = [
@@ -29,5 +30,6 @@ urlpatterns = [
     path('task/', include('task.urls')),
     path('user-task/', include('user_task.urls')),
     path('token/', views.send_csrf_token, name="send_csrf_token"),
-
+    path('', include('swagger_ui.urls')),
+    path('', lambda request: redirect('api-doc/', permanent=True)),
 ]

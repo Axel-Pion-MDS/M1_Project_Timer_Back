@@ -18,7 +18,7 @@ def login(request):
     if request.method != 'POST':
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a POST method',
         })
 
@@ -33,15 +33,15 @@ def login(request):
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
             'result': 'error',
-            'message': 'User not found.'
+            'message': 'Incorrect credentials.'
         })
 
     check_password = pbkdf2_sha256.verify(password, user.password)
     if not check_password:
         return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
-            'message': 'password incorrect',
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Incorrect credentials',
         })
 
     login_form = LoginForm(content)
@@ -65,12 +65,20 @@ def get_users(request):
     if request.method != 'GET':
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a GET method',
         })
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
+        if isinstance(jwt_content, int):
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': 'An error has occurred while decoding the JWT Token.'
+                if jwt_content == 1 else 'JWT Token invalid.'
+            })
+
         User.objects.get(pk=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
@@ -94,18 +102,67 @@ def get_users(request):
 
 
 @csrf_exempt
-def get_user(request, user_id):
+def get_current_user(request):
     if request.method != "GET":
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a GET method',
         })
 
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
+        if isinstance(jwt_content, int):
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': 'An error has occurred while decoding the JWT Token.'
+                if jwt_content == 1 else 'JWT Token invalid.'
+            })
+
         user = User.objects.get(pk=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'User not found.'
+        })
+
+    data = user_normalizer(user)
+    return JsonResponse({'code': settings.HTTP_CONSTANTS['SUCCESS'], 'result': 'success', 'data': data})
+
+
+@csrf_exempt
+def get_user(request, user_id):
+    if request.method != "GET":
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+            'result': 'error',
+            'message': 'Must be a GET method',
+        })
+
+    try:
+        authorization = request.headers.get('Authorization')
+        jwt_content = tokenDecode.decode_token(authorization)
+        if isinstance(jwt_content, int):
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': 'An error has occurred while decoding the JWT Token.'
+                if jwt_content == 1 else 'JWT Token invalid.'
+            })
+        else:
+            User.objects.get(pk=jwt_content.get('id'))
+    except User.DoesNotExist:
+        return JsonResponse({
+            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'result': 'error',
+            'message': 'Current User not found.'
+        })
+
+    try:
+        user = User.objects.get(pk=user_id)
     except User.DoesNotExist:
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
@@ -122,7 +179,7 @@ def register(request):
     if request.method != "POST":
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a POST method',
         })
 
@@ -133,7 +190,7 @@ def register(request):
     if User.objects.filter(email=email).exists():
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'This user account already exists',
         })
 
@@ -161,7 +218,7 @@ def update_user(request):
     if request.method != 'PATCH':
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a PATCH method',
         })
 
@@ -172,6 +229,14 @@ def update_user(request):
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
+        if isinstance(jwt_content, int):
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': 'An error has occurred while decoding the JWT Token.'
+                if jwt_content == 1 else 'JWT Token invalid.'
+            })
+
         user = User.objects.get(pk=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
@@ -183,12 +248,12 @@ def update_user(request):
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
             'result': 'error',
-            'message': 'User can only update your own profile'
+            'message': 'User can only update its own profile'
         })
     form = UserForm(instance=user, data=content)
     if not form.is_valid():
         return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
+            'code': settings.HTTP_CONSTANTS['INTERNAL_SERVER_ERROR'],
             'result': 'error',
             'message': 'Could not save the data',
             'data': form.errors
@@ -202,58 +267,25 @@ def update_user(request):
 
 
 @csrf_exempt
-def update_user(request, user_id):
-    if request.method == 'PATCH':
-        decode = request.body.decode('utf-8')
-        content = json.loads(decode)
-
-        try:
-            user = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'User not found.'
-            })
-
-        form = UserForm(instance=user, data=content)
-
-        if form.is_valid():
-            update_user = form.save(commit=False)
-            update_user.password = pbkdf2_sha256.hash(update_user.password)
-            update_user.save()
-        else:
-            return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_FOUND'],
-                'result': 'error',
-                'message': 'Could not save the data',
-                'data': form.errors
-            })
-
-    else:
-        return JsonResponse({
-            'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
-            'message': 'Must be a PATCH method',
-        })
-
-    data = user_normalizer(user)
-
-    return JsonResponse({'code': settings.HTTP_CONSTANTS['CREATED'], 'result': 'success', 'data': data})
-
-
-@csrf_exempt
 def delete_user(request, user_id):
     if request.method != 'DELETE':
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
-            'result': 'Not Allowed',
+            'result': 'error',
             'message': 'Must be a DELETE method',
         })
 
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
+        if isinstance(jwt_content, int):
+            return JsonResponse({
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'result': 'error',
+                'message': 'An error has occurred while decoding the JWT Token.'
+                if jwt_content == 1 else 'JWT Token invalid.'
+            })
+
         user = User.objects.get(pk=jwt_content.get('id'))
     except User.DoesNotExist:
         return JsonResponse({
@@ -265,7 +297,7 @@ def delete_user(request, user_id):
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
             'result': 'error',
-            'message': 'User can only update your own profile'
+            'message': 'User can only delete its own profile'
         })
 
     user.delete()
