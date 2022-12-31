@@ -654,6 +654,212 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAllowedJwt'
+  /team/:
+    get:
+      tags:
+        - Team
+      description: Returns all teams
+      responses:
+        '200':
+          description: Teams successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsSuccess'
+  '/team/{team_id}':
+    get:
+      tags:
+        - Team
+      description: Returns a team from its ID
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Team successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamSuccess'
+        '404':
+          description: Team has not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamNotFound'
+  '/team/add':
+    post:
+      tags:
+        - Team
+      description: Allow a user to create a team
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamFormAdd'
+      responses:
+        '201':
+          description: Team successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamAddSuccess'
+        '404':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/team/update':
+    patch:
+      tags:
+        - Team
+      description: Allow a user to update a team
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamFormUpdate'
+      responses:
+        '200':
+          description: Team successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamUpdateSuccess'
+        '404':
+          description: Team or Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/team/delete/{team_id}':
+    delete:
+      tags:
+        - Team
+      description: Allow a user to delete a team
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+        description: Team successfully deleted
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamDeleteSuccess'
+        '404':
+          description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamNotFound'
+  '/team/users/add':
+    post:
+      tags:
+        - User Team
+      description: Allow to add a User in a Team
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserTeamFormAdd'
+      responses:
+        '200':
+          description: User successfully added to the Team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTeamAddSuccess'
+        '404':
+          description: Team, User or Role not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamNotFound'
+        '405':
+          description: User already added to this Team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTeamUserAlreadyExists'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/team/users/update':
+    patch:
+      tags:
+        - User Team
+      description: Allow to update the Role of a User in a Team
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserTeamFormUpdate'
+      responses:
+        '200':
+          description: User Role successfully updated in Team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTeamAddSuccess'
+        '404':
+          description: Role or UserTeam not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleNotFound'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/team/users/delete/{user_team_id}':
+    delete:
+      tags:
+        - User Team
+      description: Allow to remove a User from a Team
+      parameters:
+        - name: user_team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User successfully removed from Team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamDeleteSuccess'
+        '404':
+          description: UserTeam not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTeamNotFound'
 components:
   securitySchemes:
     JwtToken:
@@ -1346,4 +1552,206 @@ components:
       example: {
         "email": "test@gmail.com",
         "role": 6
+      }
+    TeamsSuccess:
+      description: Response shown when Teams have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 1,
+            "label": "TeamEevolution",
+            "description": "Eevee lovers",
+            "organization": {
+              "id": 1,
+              "label": "Evoli"
+            },
+            "users": [],
+            "created_at": "2022-12-31T04:04:34.628Z",
+            "updated_at": "2022-12-31T04:04:34.628Z"
+          }
+        ]
+      }
+    TeamSuccess:
+      description: Response shown when a Team has been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "label": "TeamEevolution",
+          "description": "Eevee lovers",
+          "organization": {
+            "id": 1,
+            "label": "Evoli"
+          },
+          "users": [ ],
+          "created_at": "2022-12-31T04:04:34.628Z",
+          "updated_at": "2022-12-31T04:04:34.628Z"
+        }
+      }
+    TeamNotFound:
+      description: Response shown when a Team has not been found
+      type: object
+      example: {
+        "code": 404,
+        "result": "Not Found",
+        "data": {
+          "errors": [
+            {
+              "code": 0,
+              "input": "id",
+              "message": "Team with id: 2 not found"
+            }
+          ]
+        }
+      }
+    TeamFormAdd:
+      description: Body request for Team creation
+      type: object
+      properties:
+        label:
+          type: string
+          default: "TeamEevolution"
+        description:
+          type: string
+          default: "Eevee lovers"
+        organization:
+          type: integer
+          default: 1
+    TeamAddSuccess:
+      description: Response shown when a Team has been successfully created
+      type: object
+      example: {
+        "code": 201,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "label": "TeamEevolution",
+          "description": "Eevee lovers",
+          "organization": {
+            "id": 1,
+            "label": "Evoli"
+          },
+          "users": [ ],
+          "created_at": "2022-12-31T04:04:34.628Z",
+          "updated_at": "2022-12-31T04:04:34.628Z"
+        }
+      }
+    TeamFormUpdate:
+      description: Body request for Team update
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 1
+        label:
+          type: string
+          default: "TeamEevolution"
+        description:
+          type: string
+          default: "Let's have a team full of Eevolutions"
+        organization:
+          type: integer
+          default: 1
+    TeamUpdateSuccess:
+      description: Response shown when a Team has been successfully updated
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "label": "TeamEevolution",
+          "description": "Let's have a team full of Eevolutions",
+          "organization": {
+            "id": 1,
+            "label": "Evoli"
+          },
+          "users": [ ],
+          "created_at": "2022-12-31T04:04:34.628Z",
+          "updated_at": "2022-12-31T04:25:21.054Z"
+        }
+      }
+    TeamDeleteSuccess:
+      description: Response shown when a Team has been successfully deleted
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [ ]
+      }
+    UserTeamFormAdd:
+      description: Body request to add a User in a Team
+      type: object
+      properties:
+        team_id:
+          type: integer
+          default: 1
+        user_id:
+          type: integer
+          default: 1
+        role_id:
+          type: integer
+          default: 8
+    UserTeamAddSuccess:
+      description: Response shown when a User is successfully added to a Team
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "user": 1,
+          "team": 1,
+          "role": {
+            "id": 8,
+            "label": "ROLE_TEAM_MEMBER"
+          }
+        }
+      }
+    UserTeamUserAlreadyExists:
+      description: Response shown when a User has already been added to a Team
+      type: object
+      example: {
+        "code": 405,
+        "result": "Not allowed",
+        "data": {
+          "errors": [
+            {
+              "code": 0,
+              "input": "user",
+              "message": "This user already exists in this team"
+            }
+          ]
+        }
+      }
+    UserTeamFormUpdate:
+      description: Body request to update a User's Role in a Team
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 1
+        role_id:
+          type: integer
+          default: 7
+    UserTeamNotFound:
+      description: Response shown when a UserTeam has not been found
+      type: object
+      example: {
+        "code": 404,
+        "result": "Not Found",
+        "data": {
+          "errors": [
+            {
+              "code": 0,
+              "input": "id",
+              "message": "This user not found in this team"
+            }
+          ]
+        }
       }

@@ -1,4 +1,7 @@
 import json
+
+from django.views.decorators.csrf import csrf_exempt
+
 from service.verify_method import request_method_is
 from service.errors import Errors
 from service.send_response import send_json_response
@@ -10,6 +13,7 @@ from organization.models import Organization
 from user.models import User
 
 
+@csrf_exempt
 def get_teams(request):
     """GET list of informations from teams 
 
@@ -30,6 +34,7 @@ def get_teams(request):
     return send_json_response('SUCCESS', 'success', teams)
 
 
+@csrf_exempt
 def get_team(request, team_id):
     """GET informations from a team using its id
 
@@ -56,6 +61,7 @@ def get_team(request, team_id):
     return send_json_response('SUCCESS', 'success', team)
 
 
+@csrf_exempt
 def add_team(request):
     """POST new team
 
@@ -81,7 +87,7 @@ def add_team(request):
     # check if Organizaton object exists
     if not 'organization' in content or not Organization.objects.filter(id=content['organization']).exists():
         errors.add(0, 'organization', 'Organization not found')
-        return send_json_response('INTERNAL_SERVER_ERROR', 'error', {**errors.get_dict_erros()})
+        return send_json_response('NOT_FOUND', 'error', {**errors.get_dict_erros()})
 
     content['organization'] = Organization.objects.get(id=content['organization'])    
     form = TeamForm(content)
@@ -96,9 +102,10 @@ def add_team(request):
     # save and get team object
     team_object = form.save()
     team = team_normalizer(Team.objects.get(pk=team_object.id))
-    return send_json_response('SUCCESS', 'success', team)
+    return send_json_response('CREATED', 'success', team)
 
 
+@csrf_exempt
 def update_team(request):
     """PATCH team informations with the id in the body
 
@@ -131,7 +138,7 @@ def update_team(request):
     # check if Organizaton object exists
     if not 'organization' in content or not Organization.objects.filter(id=content['organization']).exists():
         errors.add(0, 'organization', 'Organization not found')
-        return send_json_response('INTERNAL_SERVER_ERROR', 'error', {**errors.get_dict_erros()})
+        return send_json_response('NOT_FOUND', 'error', {**errors.get_dict_erros()})
 
     team_object = Team.objects.get(pk=team_id)
     content['organization'] = Organization.objects.get(id=content['organization']) 
@@ -150,6 +157,7 @@ def update_team(request):
     return send_json_response('SUCCESS', 'success', team)
 
 
+@csrf_exempt
 def delete_team(request, team_id):
     """DELETE a team using the id
 
@@ -176,6 +184,7 @@ def delete_team(request, team_id):
     return send_json_response('SUCCESS', 'success', [])
 
 
+@csrf_exempt
 def add_user_team(request):
     """Add user inside a team
 
@@ -224,7 +233,7 @@ def add_user_team(request):
     # check if UserTeam object not exists
     if UserTeam.objects.filter(user=user, team=team).exists():
         errors.add(0, 'user', 'This user already exists in this team')
-        return send_json_response('NOT_FOUND', 'Not Found', {**errors.get_dict_erros()})        
+        return send_json_response('NOT_ALLOWED', 'Not allowed', {**errors.get_dict_erros()})
 
     form = UserTeamForm({
         'team': team,
@@ -245,6 +254,7 @@ def add_user_team(request):
     return send_json_response('SUCCESS', 'success', user_team)
 
 
+@csrf_exempt
 def update_user_team(request):
     """Update user inside a team
 
@@ -272,6 +282,7 @@ def update_user_team(request):
     # check if Role object exists
     if not Role.objects.filter(pk=role_id).exists():
         errors.add(0, 'role_id', 'Role with id: {} not found'.format(role_id))
+        return send_json_response('NOT_FOUND', 'Not Found', {**errors.get_dict_erros()})
     
     # if Error has errors return response with all errors 
     if errors.has_errors():
@@ -303,6 +314,7 @@ def update_user_team(request):
     return send_json_response('SUCCESS', 'success', user_team)    
 
 
+@csrf_exempt
 def delete_user_team(request, user_team_id):
     """DELETE user inside a team using the id
 
@@ -322,7 +334,7 @@ def delete_user_team(request, user_team_id):
 
     # check if UserTeam object exists
     if not UserTeam.objects.filter(pk=user_team_id).exists():
-        errors.add(0, 'id', 'This user not found in this team')
+        errors.add(0, 'id', 'UserTeam not found')
         return send_json_response('NOT_FOUND', 'Not Found', {**errors.get_dict_erros()})
 
     UserTeam.objects.get(pk=user_team_id).delete()
