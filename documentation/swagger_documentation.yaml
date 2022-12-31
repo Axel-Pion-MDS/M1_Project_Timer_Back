@@ -1114,7 +1114,7 @@ paths:
     post:
       tags:
         - Task
-      description: Allow a User that owns or that is a co-owner of an Organization or that has the role TEAM_LEADER in the related Team to create a Task
+      description: Allow a User that owns or that is a co-owner of an Organization or that has the role ROLE_TEAM_LEADER in the related Team to create a Task
       requestBody:
         content:
           application/json:
@@ -1149,7 +1149,7 @@ paths:
     patch:
       tags:
         - Task
-      description: Allow a User that owns or that is a co-owner of an Organization or that has the role TEAM_LEADER in the related Team to update a Task
+      description: Allow a User that owns or that is a co-owner of an Organization or that has the role ROLE_TEAM_LEADER in the related Team to update a Task
       requestBody:
         content:
           application/json:
@@ -1184,7 +1184,7 @@ paths:
     delete:
       tags:
         - Task
-      description: Allow a User that owns or that is a co-owner of an Organization or that has the role TEAM_LEADER in the related Team to delete a Task
+      description: Allow a User that owns or that is a co-owner of an Organization or that has the role ROLE_TEAM_LEADER in the related Team to delete a Task
       parameters:
         - name: task_id
           in: path
@@ -1216,6 +1216,172 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAllowedJwt'
+  /user-task/:
+    get:
+      tags:
+        - User Task
+      description: Returns all Tasks for the current User
+      responses:
+        '200':
+          description: UserTasks successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTasksSuccess'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/user-task/{user_task_id}':
+    get:
+      tags:
+        - User Task
+      description: Returns a UserTask from its ID
+      parameters:
+        - name: user_task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: UserTasks successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTaskSuccess'
+        '404':
+          description: User or UserTask not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/user-task/users/{task_id}':
+    get:
+      tags:
+        - User Task
+      description: Returns all Users on a Task from its ID
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: UserTasks successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersTaskSuccess'
+        '404':
+          description: User, Task or UserTask not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/user-task/add':
+    post:
+      tags:
+        - User Task
+      description: Allow a User that owns or that co-owns an Organization or who has the role ROLE_TEAM_LEADER to assign Users on a Task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserTaskFormAdd'
+      responses:
+        '201':
+          description: Users successfully assigned to Task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTaskAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User, Organization, Task or UserTask not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Task already assigned to User response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/user-task/delete':
+    delete:
+      tags:
+        - User Task
+      description: Allow a User that owns or that co-owns an Organization or who has the role ROLE_TEAM_LEADER to remove a User from a Task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserTaskFormDelete'
+      responses:
+        '200':
+          description: User successfully removed from Task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDeleteSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User, Organization or Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Task already assigned to User response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form or could not delete the Organization's owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
 components:
   securitySchemes:
     JwtToken:
@@ -2347,5 +2513,155 @@ components:
           type: boolean
           default: False
         project:
+          type: integer
+          default: 1
+    UserTasksSuccess:
+      description: Response shown when User's Tasks have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 1,
+            "task": {
+              "id": 1,
+              "label": "쏟아져 불덩이가 이름이 궁금해 다"
+            },
+            "user": {
+              "id": 2,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pionaxel@gmail.com"
+            }
+          },
+          {
+            "id": 2,
+            "task": {
+              "id": 2,
+              "label": "발을 담기도 전에 이겨버렸지"
+            },
+            "user": {
+              "id": 2,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pionaxel@gmail.com"
+            }
+          }
+        ]
+      }
+    UserTaskSuccess:
+      description: Response shown when a User's Task has been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "task": {
+            "id": 1,
+            "label": "쏟아져 불덩이가 이름이 궁금해 다"
+          },
+          "user": {
+            "id": 2,
+            "firstname": "Axel",
+            "lastname": "Pion",
+            "email": "pionaxel@gmail.com"
+          }
+        }
+      }
+    UsersTaskSuccess:
+      description: Response shown when all Users on a Task have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "task": {
+              "id": 1,
+              "label": "Prendre des niveaux"
+            }
+          },
+          {
+            "users": [
+              {
+                "id": 2,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pionaxel@gmail.com"
+              },
+              {
+                "id": 4,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pouet@gmail.com"
+              },
+              {
+                "id": 3,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "test@gmail.com"
+              }
+            ]
+          }
+        ]
+      }
+    UserTaskFormAdd:
+      description: Body request to assign Users to a Task
+      type: object
+      example: {
+        "users": [
+          "pouet@gmail.com",
+          "test@gmail.com"
+        ],
+        "organization": 1,
+        "task": 1
+      }
+    UserTaskAddSuccess:
+      description: Response shown when Users have been successfully assigned to a Task
+      type: object
+      example: {
+        "code": 201,
+        "result": "success",
+        "data": {
+          "id": 4,
+          "task": {
+            "id": 1,
+            "label": "Sadness and Sorrow"
+          },
+          "user": [
+            {
+              "id": 2,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pionaxel@gmail.com"
+            },
+            {
+              "id": 4,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pouet@gmail.com"
+            },
+            {
+              "id": 3,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "test@gmail.com"
+            }
+          ]
+        }
+      }
+    UserTaskFormDelete:
+      description: Body request to remove a User from a Task
+      type: object
+      properties:
+        user:
+          type: string
+          default: "test@gmail.com"
+        organization:
+          type: integer
+          default: 1
+        task:
           type: integer
           default: 1

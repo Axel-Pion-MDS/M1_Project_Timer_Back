@@ -359,7 +359,7 @@ def delete_user_from_task(request):
              user_to_delete.role.id == settings.ROLES['ROLE_ORGANIZATION_MEMBER']) and
                 user.role.id != settings.ROLES['ROLE_ORGANIZATION_OWNER']):
             return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
                 'result': 'error',
                 'message': 'You do not have the right privileges to access this resource.'
             })
@@ -367,7 +367,7 @@ def delete_user_from_task(request):
         if (user_to_delete.role.id == settings.ROLES['ROLE_ORGANIZATION_MEMBER'] and
                 user.role.id != settings.ROLES['ROLE_ORGANIZATION_OWNER']):
             return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
+                'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
                 'result': 'error',
                 'message': 'You do not have the right privileges to access this resource.'
             })
@@ -375,7 +375,7 @@ def delete_user_from_task(request):
         if (user_to_delete.role.id == settings.ROLES['ROLE_ORGANIZATION_OWNER'] and
                 user.role.id != settings.ROLES['ROLE_ORGANIZATION_OWNER']):
             return JsonResponse({
-                'code': settings.HTTP_CONSTANTS['FORBIDDEN'],
+                'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
                 'result': 'error',
                 'message': 'You can not delete the owner, please delete the Task instead.'
             })
