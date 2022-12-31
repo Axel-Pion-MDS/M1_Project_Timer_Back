@@ -17,6 +17,8 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
@@ -41,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'swagger_ui',
     'user.apps.UserConfig',
     'role.apps.RoleConfig',
     'organization.apps.OrganizationConfig',
@@ -171,5 +174,5 @@ env = Env()
 env.read_env()
 TOKEN_KEY = env("JWT_TOKEN_KEY")
 
-SWAGGER_YAML_FILE = '../documentation/swagger_documentation.yaml'
+SWAGGER_YAML_FILE = os.path.join(os.path.dirname(SITE_ROOT), 'documentation/swagger_documentation.yaml')
 

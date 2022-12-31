@@ -28,4 +28,5 @@ urlpatterns = [
     path('task/', include('task.urls')),
     path('user-task/', include('user_task.urls')),
     path('token/', views.send_csrf_token, name="send_csrf_token"),
+    path('', include('swagger_ui.urls')),
 ]

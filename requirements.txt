@@ -4,3 +4,4 @@ django-cors-headers==3.13.0
 passlib==1.7.4
 pyjwt==2.6.0
 environs==9.5.0
+git+https://github.com/Maengdok/django-swagger-ui.git#egg=django-swagger-ui

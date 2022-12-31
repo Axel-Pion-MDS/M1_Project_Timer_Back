@@ -2279,10 +2279,10 @@ components:
           default: 믿지 못 할 것들 다, 눈이 부셔 못보다
         provisional_start:
           type: string
-          default: 2022-12-26T17:00:00
+          default: "2022-12-26T17:00:00"
         provisional_end:
           type: string
-          default: 2022-12-26T17:20:00
+          default: "2022-12-26T17:20:00"
         provisional_time:
           type: string
           default: 00:20:00
@@ -2333,10 +2333,10 @@ components:
           default: 믿지 못 할 것들 다, 눈이 부셔 못보다
         provisional_start:
           type: string
-          default: 2022-12-26T17:00:00
+          default: "2022-12-26T17:00:00"
         provisional_end:
           type: string
-          default: 2022-12-26T17:20:00
+          default: "2022-12-26T17:20:00"
         provisional_time:
           type: string
           default: 00:20:00
