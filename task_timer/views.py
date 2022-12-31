@@ -152,7 +152,11 @@ def start_task_timer(request, task_id):
 
     task_timer = TaskTimer(start_time=timezone.now(),task=task)
     task_timer.save()
-    return JsonResponse({'message': 'Task time successfully started'}, status=200)
+    return JsonResponse({
+        'code': settings.HTTP_CONSTANTS['SUCCESS'],
+        'result': 'success',
+        'message': 'Task time successfully started'
+        })
 
 
 @csrf_exempt
@@ -229,7 +233,12 @@ def stop_task_timer(request, task_timer_id):
     duration = task_timer.end_time - task_timer.start_time
     task_timer.total_time = duration
     task_timer.save()
-    return JsonResponse({'message': 'Task time successfully stoped'}, status=200)
+    return JsonResponse({
+        'code': settings.HTTP_CONSTANTS['SUCCESS'],
+        'result': 'success',
+        'message': 'Task time successfully stoped'
+    })
+    
 
 @csrf_exempt
 def delete_task_timer(request, task_timer_id):
@@ -302,4 +311,9 @@ def delete_task_timer(request, task_timer_id):
             return user_team
 
     task_timer.delete()
-    return JsonResponse({'message': 'Task time successfully deleted'}, status=200)
+    return JsonResponse({
+        'code': settings.HTTP_CONSTANTS['SUCCESS'],
+        'result': 'success',
+        'message': 'Task time successfully deleted'
+    })
+    
