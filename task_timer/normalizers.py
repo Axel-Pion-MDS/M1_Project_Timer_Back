@@ -3,13 +3,13 @@ from .models import TaskTimer
 def task_timers_normalizer(data):
     result = []
     for task_timer in data:
-        task_timer_details = TaskTimer.objects.get(pk=task_timer['id'])
+        task_timer_details = TaskTimer.objects.get(pk=task_timer.id)
 
         item = {
-            'id': task_timer['id'],
-            'start_time': task_timer['start_time'],
-            'end_time': task_timer['end_time'],
-            'total_time': task_timer['total_time'],
+            'id': task_timer.id,
+            'start_time': task_timer.start_time,
+            'end_time': task_timer.end_time,
+            'total_time': task_timer.total_time,
             'task': {
                 'id': task_timer_details.task.id,
                 'label': task_timer_details.task.label,
