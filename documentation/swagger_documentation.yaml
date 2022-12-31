@@ -1382,6 +1382,160 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InternalServerError'
+  'task-timer/{task_id}':
+    get:
+      tags:
+        - Task Timer
+      description: Returns all Task's timers
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: All Task's timers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskTimersSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Task already assigned to User response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  'task-timer/{task_id}/start':
+    post:
+      tags:
+        - Task Timer
+      description: Allow a User to create a TaskTimer
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskTimerFormStart'
+      responses:
+        '201':
+          description: TaskTimer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskTimersSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Task already assigned to User response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  'task-timer/{task_timer_id}/stop':
+    post:
+      tags:
+        - Task Timer
+      description: Allow a User to create a TaskTimer
+      parameters:
+        - name: task_timer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskTimerFormStop'
+      responses:
+        '201':
+          description: TaskTimer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskTimersSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Task already assigned to User response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  'task-timer/{task_timer_id}/delete':
+    delete:
+      tags:
+        - Task Timer
+      description: Allow a User to delete a TaskTimer
+      parameters:
+        - name: task_timer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: TaskTimer delete successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskTimersSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Task already assigned to User response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
 components:
   securitySchemes:
     JwtToken:
@@ -2665,3 +2819,36 @@ components:
         task:
           type: integer
           default: 1
+    TaskTimersSuccess:
+      description: Response shown when all Task's timers have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [ ]
+      }
+    TaskTimerFormStart:
+      description: Body request to create a TaskTimer
+      type: object
+      example: {
+        'start_time': '2022-12-26T17:00:00',
+        'end_time': '2022-12-26T17:20:00',
+        'total_time': '00:20:00',
+        'task': 1
+      }
+    TaskTimerStartSuccess:
+      description: Response shown when a TaskTimer has been successfully created
+      type: object
+      example: {
+        'message': 'Task time successfully started'
+      }
+    TaskTimerFormStop:
+      description: Body request to create a TaskTimer
+      type: object
+      example: {
+        'id': 1,
+        'start_time': '2022-12-26T17:00:00',
+        'end_time': '2022-12-26T17:20:00',
+        'total_time': '00:20:00',
+        'task': 1
+      }
