@@ -761,11 +761,11 @@ paths:
             type: integer
       responses:
         '200':
-        description: Team successfully deleted
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TeamDeleteSuccess'
+          description: Team successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamDeleteSuccess'
         '404':
           description: Team not found
           content:
@@ -860,6 +860,184 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserTeamNotFound'
+  /project/:
+    get:
+      tags:
+        - Project
+      description: Returns all Projects
+      responses:
+        '200':
+          description: All Projects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectsSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/project/{project_id}':
+    get:
+      tags:
+        - Project
+      description: Returns a Project from its ID
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Project successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSuccess'
+        '404':
+          description: User or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/project/add':
+    post:
+      tags:
+        - Project
+      description: Allow a User that owns or that is co-owner of an Organization to create a project
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectFormAdd'
+      responses:
+        '201':
+          description: Project successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Project already exists response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/project/update':
+    patch:
+      tags:
+        - Project
+      description: Allow a User that owns or that is co-owner of an Organization to update a project
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectFormUpdate'
+      responses:
+        '201':
+          description: Project successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: Project, User or Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Project already exists response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/project/delete/{project_id}':
+    delete:
+      tags:
+        - Project
+      description: Allow a User that owns or that is co-owner of an Organization to delete a project
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Project successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDeleteSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
 components:
   securitySchemes:
     JwtToken:
@@ -1755,3 +1933,95 @@ components:
           ]
         }
       }
+    ProjectsSuccess:
+      description: Response shown when Projects have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 2,
+            "label": "Freefall",
+            "description": "meh...",
+            "created_at": "2022-12-25T17:23:09.184Z",
+            "updated_at": "2022-12-25T17:23:09.184Z",
+            "organization": 1,
+            "team": "null"
+          },
+          {
+            "id": 3,
+            "label": "Sempiternal",
+            "description": "meh...",
+            "created_at": "2022-12-25T17:31:34.210Z",
+            "updated_at": "2022-12-25T17:31:34.210Z",
+            "organization": 1,
+            "team": "null"
+          },
+        ]
+      }
+    ProjectSuccess:
+      description: Response shown when a Project has been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 3,
+          "label": "Sempiternal",
+          "description": "meh...",
+          "created_at": "2022-12-25T17:31:34.210Z",
+          "updated_at": "2022-12-25T17:31:34.210Z",
+          "organization": 1,
+          "team": "null"
+        }
+      }
+    ProjectFormAdd:
+      description: Body request for Project creation
+      type: object
+      properties:
+        label:
+          type: string
+          default: 팻두
+        description:
+          type: string
+          default: 죽은 친구와의 전화
+        organization:
+          type: integer
+          default: 1
+        team:
+          type: integer
+    ProjectAddSuccess:
+      description: Response shown when a Project has been successfully created
+      type: object
+      example: {
+        "code": 201,
+        "result": "success",
+        "project": {
+          "id": 1,
+          "label": "팻두",
+          "description": "죽은 친구와의 전화",
+          "created_at": "2022-12-27T13:46:53.423Z",
+          "updated_at": "2022-12-27T13:46:53.423Z",
+          "organization": 1,
+          "team": "null"
+        }
+      }
+    ProjectFormUpdate:
+      description: Body request for Project creation
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 1
+        label:
+          type: string
+          default: 팻두
+        description:
+          type: string
+          default: 죽은 친구와의 전화
+        organization:
+          type: integer
+          default: 1
+        team:
+          type: integer
