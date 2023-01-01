@@ -1,3 +1,4 @@
+from user_organization.models import UserOrganization
 from .models import User
 
 
@@ -5,6 +6,16 @@ def users_normalizer(data):
     result = []
     for user in data:
         user_details = User.objects.get(pk=user['id'])
+        organization_details = UserOrganization.objects.filter(user=user['id'])
+
+        organizations = []
+        for organization in organization_details:
+            item = {
+                'id': organization.organization.id,
+                'label': organization.organization.label
+            }
+
+            organizations.append(item)
 
         item = {
             'id': user['id'],
@@ -16,7 +27,9 @@ def users_normalizer(data):
             'role': {
                 'id': user_details.role.id,
                 'label': user_details.role.label
-            } if user_details.role else 'null'
+            } if user_details.role else 'null',
+            'organizations': organizations if organizations else 'null',
+
         }
 
         result.append(item)
@@ -25,6 +38,17 @@ def users_normalizer(data):
 
 
 def user_normalizer(data):
+    organization_details = UserOrganization.objects.filter(user=data.id)
+
+    organizations = []
+    for organization in organization_details:
+        item = {
+            'id': organization.organization.id,
+            'label': organization.organization.label
+        }
+
+        organizations.append(item)
+
     return {
         'id': data.id,
         'firstname': data.firstname,
@@ -35,5 +59,6 @@ def user_normalizer(data):
         'role': {
                 'id': data.role.id,
                 'label': data.role.label
-        } if data.role else 'null'
+        } if data.role else 'null',
+        'organizations': organizations if organizations else 'null',
     }
