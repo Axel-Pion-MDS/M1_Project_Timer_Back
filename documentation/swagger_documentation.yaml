@@ -1429,11 +1429,6 @@ paths:
           required: true
           schema:
             type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TaskTimerFormStart'
       responses:
         '201':
           description: TaskTimer created
@@ -1470,11 +1465,6 @@ paths:
           required: true
           schema:
             type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TaskTimerFormStop'
       responses:
         '201':
           description: TaskTimer created successfully
@@ -2827,28 +2817,9 @@ components:
         "result": "success",
         "data": [ ]
       }
-    TaskTimerFormStart:
-      description: Body request to create a TaskTimer
-      type: object
-      example: {
-        'start_time': '2022-12-26T17:00:00',
-        'end_time': '2022-12-26T17:20:00',
-        'total_time': '00:20:00',
-        'task': 1
-      }
     TaskTimerStartSuccess:
       description: Response shown when a TaskTimer has been successfully created
       type: object
       example: {
         'message': 'Task time successfully started'
-      }
-    TaskTimerFormStop:
-      description: Body request to create a TaskTimer
-      type: object
-      example: {
-        'id': 1,
-        'start_time': '2022-12-26T17:00:00',
-        'end_time': '2022-12-26T17:20:00',
-        'total_time': '00:20:00',
-        'task': 1
       }
