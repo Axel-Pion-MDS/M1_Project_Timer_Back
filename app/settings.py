@@ -11,11 +11,13 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 import os
+from environs import Env
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -31,19 +33,31 @@ ALLOWED_HOSTS = [
     '*',
 ]
 
-
 # Application definition
 
 INSTALLED_APPS = [
+    "corsheaders",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'swagger_ui',
+    'user.apps.UserConfig',
+    'role.apps.RoleConfig',
+    'organization.apps.OrganizationConfig',
+    'user_organization.apps.UserOrganizationConfig',
+    'project.apps.ProjectConfig',
+    'team.apps.TeamConfig',
+    'task.apps.TaskConfig',
+    'task_timer.apps.TaskTimerConfig',
+    'user_task.apps.UserTaskConfig',
+
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,6 +65,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:3000",
+    "http://localhost:3000"
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -129,3 +148,33 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Constants
+HTTP_CONSTANTS = {
+    'SUCCESS': 200,
+    'CREATED': 201,
+    'BAD_REQUEST': 400,
+    'UNAUTHENTICATED': 401,
+    'FORBIDDEN': 403,
+    'NOT_FOUND': 404,
+    'NOT_ALLOWED': 405,
+    'INTERNAL_SERVER_ERROR': 500,
+}
+
+ROLES = {
+    'ROLE_USER': 1,
+    'ROLE_ADMIN': 2,
+    'ROLE_SUPER_ADMIN': 3,
+    'ROLE_ORGANIZATION_OWNER': 4,
+    'ROLE_ORGANIZATION_CO_OWNER': 5,
+    'ROLE_ORGANIZATION_MEMBER': 6,
+    'ROLE_TEAM_LEADER': 7,
+    'ROLE_TEAM_MEMBER': 8,
+}
+
+env = Env()
+env.read_env()
+TOKEN_KEY = env("JWT_TOKEN_KEY")
+
+SWAGGER_YAML_FILE = os.path.join(os.path.dirname(SITE_ROOT), 'documentation/swagger_documentation.yaml')
+

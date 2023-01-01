@@ -14,8 +14,22 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.shortcuts import redirect
+from django.urls import path, include, re_path
+from app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('user/', include('user.urls')),
+    path('role/', include('role.urls')),
+    path('organization/', include('organization.urls')),
+    path('user-organization/', include('user_organization.urls')),
+    path('team/', include('team.urls')),
+    path('project/', include('project.urls')),
+    path('task_timer/', include('task_timer.urls')),
+    path('task/', include('task.urls')),
+    path('user-task/', include('user_task.urls')),
+    path('token/', views.send_csrf_token, name="send_csrf_token"),
+    path('', include('swagger_ui.urls')),
+    path('', lambda request: redirect('api-doc/', permanent=True)),
 ]

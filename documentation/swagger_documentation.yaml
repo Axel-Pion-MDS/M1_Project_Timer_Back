@@ -1,0 +1,2825 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/Maengdok/MDSM1ProjectTimerApi/1.0.0
+info:
+  version: "1.0.0"
+  title: Project Timer API
+  description: Create and manage task's project inside your organization
+security: []
+paths:
+  /user/:
+    get:
+      tags:
+        - User
+      description: Returns all users
+      responses:
+        '200':
+          description: All users response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/user/{user_id}':
+    get:
+      tags:
+        - User
+      description: Returns a user from its ID
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFound'
+        '404':
+          description: User Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  "/user/login":
+    post:
+      tags:
+        - User
+      description: Allow a user to connect to the application
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserFormLogIn'
+      responses:
+        '200':
+          description: User connected successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogInSuccessResponse'
+        '405':
+          description: User credentials invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogInFailureResponse'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  "/user/add":
+    post:
+      tags:
+        - User
+      description: Allow a user to create an account
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserFormAdd'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAddSuccess'
+        '405':
+          description: Account already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAlreadyExists'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  "/user/update":
+    patch:
+      tags:
+        - User
+      description: Allow a user to update its own profile
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserFormUpdate'
+      responses:
+        '201':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserUpdateSuccess'
+        '403':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '404':
+          description: User not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Forbidden request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenUserUpdate'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  "/user/delete/{user_id}":
+    delete:
+      tags:
+        - User
+      description: Delete a user
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDeleteSuccess'
+        '403':
+          description: Forbidden request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenUserDelete'
+        '404':
+          description: User not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  /role/:
+    get:
+      tags:
+        - Role
+      description: Returns all roles
+      responses:
+        '200':
+          description: All roles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RolesSuccess'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/role/{role_id}':
+    get:
+      tags:
+        - Role
+      description: Returns a role from its ID
+      parameters:
+        - name: role_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Role details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleSuccess'
+        '404':
+          description: Role not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/role/add':
+    post:
+      tags:
+        - Role
+      description: Allow user with the role 'ROLE_ADMIN' or 'ROLE_SUPER_ADMIN' to create role
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/RoleFormAdd'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/role/update':
+    patch:
+      tags:
+        - Role
+      description: Allow user with the role 'ROLE_ADMIN' or 'ROLE_SUPER_ADMIN' to update a role
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/RoleFormUpdate'
+      responses:
+        '201':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/role/delete/{role_id}':
+    delete:
+      tags:
+        - Role
+      description: Allow user with the role 'ROLE_ADMIN' or 'ROLE_SUPER_ADMIN' to delete a role
+      parameters:
+        - name: role_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Role deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleDeleteSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: Role not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  /organization/:
+    get:
+      tags:
+        - Organization
+      description: Returns all organizations
+      responses:
+        '200':
+          description: All organizations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationsSuccess'
+  '/organization/{organization_id}':
+    get:
+      tags:
+        - Organization
+      description: Returns an organization from its ID
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Organization's details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationSuccess'
+        '404':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+  '/organization/add':
+    post:
+      tags:
+        - Organization
+      description: Allow a user to create an organization and automatically becomes the owner
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/OrganizationFormAdd'
+      responses:
+        '201':
+          description: Organization created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationAddSuccess'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/organization/update':
+    patch:
+      tags:
+        - Organization
+      description: Allow a user that owns or that is a co-owner of an organization to update it
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/OrganizationFormUpdate'
+      responses:
+        '201':
+          description: Organization updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/organization/delete/{organization_id}':
+    delete:
+      tags:
+        - Organization
+      description: Allow a user with the ROLE_ORGANIZATION_OWNER to delete its organization
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Organization's details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDeleteSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  /user-organization/:
+    get:
+      tags:
+        - User Organization
+      description: Returns all user_organizations
+      responses:
+        '200':
+          description: All user_organizations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationsSuccess'
+  '/user-organization/{user_organization_id}':
+    get:
+      tags:
+        - User Organization
+      description: Returns an user_organization from its ID
+      parameters:
+        - name: user_organization_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: UserOrganization's details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationSuccess'
+        '404':
+          description: UserOrganization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationNotFound'
+  '/user-organization/users/{organization_id}':
+    get:
+      tags:
+        - User Organization
+      description: Returns all members of an organization from its ID
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Organization's members details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationSuccess'
+        '404':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+  '/user-organization/add':
+    post:
+      tags:
+        - User Organization
+      description: Allow an organization's owner or co-owner to add users to their organization
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserOrganizationFormAdd'
+      responses:
+        '201':
+          description: UserOrganization created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationAddSuccess'
+        '403':
+          description: Can not invite yourself
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationForbidden'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/user-organization/update':
+    patch:
+      tags:
+        - User Organization
+      description: Allow an organization's owner or co-owner to update user's role in their organization
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserOrganizationFormUpdate'
+      responses:
+        '201':
+          description: User role in Organization updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationAddSuccess'
+        '403':
+          description: Can not update yourself
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationForbidden'
+        '404':
+          description: User not found in Organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInOrganizationNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/user-organization/delete':
+    delete:
+      tags:
+        - User Organization
+      description: Allow an organization's owner or co-owner to delete a user from their organization
+      responses:
+        '200':
+          description: User successfully removed from Organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationDeleteSuccess'
+        '403':
+          description: Can not delete yourself
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrganizationForbidden'
+        '404':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  /team/:
+    get:
+      tags:
+        - Team
+      description: Returns all teams
+      responses:
+        '200':
+          description: Teams successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsSuccess'
+  '/team/{team_id}':
+    get:
+      tags:
+        - Team
+      description: Returns a team from its ID
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Team successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamSuccess'
+        '404':
+          description: Team has not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamNotFound'
+  '/team/add':
+    post:
+      tags:
+        - Team
+      description: Allow a user to create a team
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamFormAdd'
+      responses:
+        '201':
+          description: Team successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamAddSuccess'
+        '404':
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/team/update':
+    patch:
+      tags:
+        - Team
+      description: Allow a user to update a team
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamFormUpdate'
+      responses:
+        '200':
+          description: Team successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamUpdateSuccess'
+        '404':
+          description: Team or Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationNotFound'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/team/delete/{team_id}':
+    delete:
+      tags:
+        - Team
+      description: Allow a user to delete a team
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Team successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamDeleteSuccess'
+        '404':
+          description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamNotFound'
+  '/team/users/add':
+    post:
+      tags:
+        - User Team
+      description: Allow to add a User in a Team
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserTeamFormAdd'
+      responses:
+        '200':
+          description: User successfully added to the Team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTeamAddSuccess'
+        '404':
+          description: Team, User or Role not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamNotFound'
+        '405':
+          description: User already added to this Team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTeamUserAlreadyExists'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/team/users/update':
+    patch:
+      tags:
+        - User Team
+      description: Allow to update the Role of a User in a Team
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserTeamFormUpdate'
+      responses:
+        '200':
+          description: User Role successfully updated in Team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTeamAddSuccess'
+        '404':
+          description: Role or UserTeam not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleNotFound'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/team/users/delete/{user_team_id}':
+    delete:
+      tags:
+        - User Team
+      description: Allow to remove a User from a Team
+      parameters:
+        - name: user_team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User successfully removed from Team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamDeleteSuccess'
+        '404':
+          description: UserTeam not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTeamNotFound'
+  /project/:
+    get:
+      tags:
+        - Project
+      description: Returns all Projects
+      responses:
+        '200':
+          description: All Projects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectsSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/project/{project_id}':
+    get:
+      tags:
+        - Project
+      description: Returns a Project from its ID
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Project successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSuccess'
+        '404':
+          description: User or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/project/add':
+    post:
+      tags:
+        - Project
+      description: Allow a User that owns or that is co-owner of an Organization to create a project
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectFormAdd'
+      responses:
+        '201':
+          description: Project successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Project already exists response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/project/update':
+    patch:
+      tags:
+        - Project
+      description: Allow a User that owns or that is co-owner of an Organization to update a project
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectFormUpdate'
+      responses:
+        '201':
+          description: Project successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: Project, User or Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Project already exists response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/project/delete/{project_id}':
+    delete:
+      tags:
+        - Project
+      description: Allow a User that owns or that is co-owner of an Organization to delete a project
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Project successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDeleteSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/task/project/{project_id}':
+    get:
+      tags:
+        - Task
+      description: Returns all Tasks for a Project
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: All Tasks in Project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskProjectTasksSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/task/{task_id}':
+    get:
+      tags:
+        - Task
+      description: Returns a Task from its ID
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Task successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User, Task or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/task/add':
+    post:
+      tags:
+        - Task
+      description: Allow a User that owns or that is a co-owner of an Organization or that has the role ROLE_TEAM_LEADER in the related Team to create a Task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskFormAdd'
+      responses:
+        '201':
+          description: Task successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/task/update':
+    patch:
+      tags:
+        - Task
+      description: Allow a User that owns or that is a co-owner of an Organization or that has the role ROLE_TEAM_LEADER in the related Team to update a Task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskFormUpdate'
+      responses:
+        '201':
+          description: Task successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User, Task or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/task/delete/{task_id}':
+    delete:
+      tags:
+        - Task
+      description: Allow a User that owns or that is a co-owner of an Organization or that has the role ROLE_TEAM_LEADER in the related Team to delete a Task
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Task successfully delete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDeleteSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User, Task or Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  /user-task/:
+    get:
+      tags:
+        - User Task
+      description: Returns all Tasks for the current User
+      responses:
+        '200':
+          description: UserTasks successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTasksSuccess'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/user-task/{user_task_id}':
+    get:
+      tags:
+        - User Task
+      description: Returns a UserTask from its ID
+      parameters:
+        - name: user_task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: UserTasks successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTaskSuccess'
+        '404':
+          description: User or UserTask not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/user-task/users/{task_id}':
+    get:
+      tags:
+        - User Task
+      description: Returns all Users on a Task from its ID
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: UserTasks successfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersTaskSuccess'
+        '404':
+          description: User, Task or UserTask not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  '/user-task/add':
+    post:
+      tags:
+        - User Task
+      description: Allow a User that owns or that co-owns an Organization or who has the role ROLE_TEAM_LEADER to assign Users on a Task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserTaskFormAdd'
+      responses:
+        '201':
+          description: Users successfully assigned to Task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTaskAddSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User, Organization, Task or UserTask not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Task already assigned to User response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  '/user-task/delete':
+    delete:
+      tags:
+        - User Task
+      description: Allow a User that owns or that co-owns an Organization or who has the role ROLE_TEAM_LEADER to remove a User from a Task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserTaskFormDelete'
+      responses:
+        '200':
+          description: User successfully removed from Task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDeleteSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User, Organization or Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Task already assigned to User response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+        '500':
+          description: Could not validate the form or could not delete the Organization's owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  'task-timer/{task_id}':
+    get:
+      tags:
+        - Task Timer
+      description: Returns all Task's timers
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: All Task's timers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskTimersSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Task already assigned to User response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  'task-timer/{task_id}/start':
+    post:
+      tags:
+        - Task Timer
+      description: Allow a User to create a TaskTimer
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: TaskTimer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskTimersSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Task already assigned to User response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  'task-timer/{task_timer_id}/stop':
+    post:
+      tags:
+        - Task Timer
+      description: Allow a User to create a TaskTimer
+      parameters:
+        - name: task_timer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: TaskTimer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskTimersSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Task already assigned to User response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+  'task-timer/{task_timer_id}/delete':
+    delete:
+      tags:
+        - Task Timer
+      description: Allow a User to delete a TaskTimer
+      parameters:
+        - name: task_timer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: TaskTimer delete successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskTimersSuccess'
+        '403':
+          description: Forbidden access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: User or Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '405':
+          description: Bad JWT or Task already assigned to User response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowedJwt'
+components:
+  securitySchemes:
+    JwtToken:
+      description: Jwt Token example.
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    NotAllowed:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+      description: Response shown on a not allowed request.
+    NotAllowedJwt:
+      description: Response shown on a request with wrong JWT.
+      type: object
+      example: {
+          "code": 405,
+          "result": "error",
+          "message": "An error has occurred while decoding the JWT Token."
+      }
+    ForbiddenUserUpdate:
+      description: Response shown when trying to update a user other than itself.
+      type: object
+      example: {
+          "code": 403,
+          "result": "error",
+          "message": "User can only update its own profile"
+      }
+    ForbiddenUserDelete:
+      description: Response shown when trying to delete a user other than itself.
+      type: object
+      example: {
+          "code": 403,
+          "result": "error",
+          "message": "User can only delete its own profile"
+      }
+    Forbidden:
+      description: Response shown on a forbidden request.
+      type: object
+      example: {
+        "code": 403,
+        "result": "error",
+        "message": "You do not have the right privileges to access this resource."
+      }
+    InternalServerError:
+      description: Response shown on a POST/PATCH request that could not have been saved.
+      type: object
+      example: {
+          "code": 500,
+          "result": "error",
+          "message": "Could not save the data",
+          "data": "firstname required"
+      }
+    UserFormLogIn:
+        description: Body request for User
+        type: object
+        properties:
+          email:
+            type: string
+            default: test@gmail.com
+          password:
+            type: string
+            default: test
+    UserFormAdd:
+        description: Body request for User
+        type: object
+        properties:
+          firstname:
+            type: string
+            default: Axel
+          lastname:
+            type: string
+            default: Pion
+          email:
+            type: string
+            default: test@gmail.com
+          password:
+            type: string
+            default: test
+    UserFormUpdate:
+        description: Body request for User
+        type: object
+        properties:
+          id:
+            type: integer
+            default: 1
+          firstname:
+            type: string
+            default: Axel
+          lastname:
+            type: string
+            default: Pion
+          email:
+            type: string
+            default: test@gmail.com
+          password:
+            type: string
+            default: test
+    UserNotFound:
+      description: Error shown when a user can not be found.
+      type: object
+      example: {
+          "code": 404,
+          "result": "error",
+          "message": "User not found."
+      }
+    UserFound:
+      description: Response shown when a user has been found.
+      type: object
+      example: {
+                "code": 200,
+                "result": "success",
+                "data": {
+                    "id": 2,
+                    "firstname": "Axel",
+                    "lastname": "Pion",
+                    "email": "pionaxel@gmail.com",
+                    "created_at": "2022-12-27T13:45:20.311Z",
+                    "updated_at": "2022-12-27T13:45:20.311Z",
+                    "role": {
+                        "id": 1,
+                        "label": "ROLE_USER"
+                    }
+                }
+            }
+    UsersFound:
+      description: Response shown when users has been found.
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+            {
+                "id": 2,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pionaxel@gmail.com",
+                "created_at": "2022-12-27T13:45:20.311Z",
+                "updated_at": "2022-12-27T13:45:20.311Z",
+                "role": {
+                    "id": 1,
+                    "label": "ROLE_USER"
+                }
+            },
+            {
+              "id": 3,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "test@gmail.com",
+              "created_at": "2022-12-27T13:45:37.089Z",
+              "updated_at": "2022-12-27T13:45:37.089Z",
+              "role": {
+                  "id": 1,
+                  "label": "ROLE_USER"
+              }
+          },
+        ]
+      }
+    LogInSuccessResponse:
+      description: Response shown when a user successfully log in.
+      type: object
+      example: {
+          "code": 200,
+          "result": "success",
+          "token": 'JwtToken',
+          "user": {
+              "id": 2,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pionaxel@gmail.com",
+              "created_at": "2022-12-27T13:45:20.311Z",
+              "updated_at": "2022-12-27T13:45:20.311Z",
+              "role": {
+                  "id": 1,
+                  "label": "ROLE_USER"
+              }
+          }
+      }
+    LogInFailureResponse:
+      description: Response shown when a user fails to log in.
+      type: object
+      example: {
+          "code": 404,
+          "result": "error",
+          "message": "Incorrect Credentials"
+      }
+    UserAddSuccess:
+      description: Response shown when a user has successfully been created.
+      type: object
+      example: {
+          "code": 201,
+          "result": "success",
+          "token": "JwtToken",
+          "user": {
+              "id": 5,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "plop@gmail.com",
+              "created_at": "2022-12-29T18:01:34.224Z",
+              "updated_at": "2022-12-29T18:01:34.224Z",
+              "role": {
+                  "id": 1,
+                  "label": "ROLE_USER"
+              }
+          }
+      }
+    UserAlreadyExists:
+      description: Response shown when a user tries to create a account with an email that is already used for another account.
+      type: object
+      example: {
+          'code': 405,
+          'result': 'error',
+          'message': 'This user account already exists',
+      }
+    UserUpdateSuccess:
+      description: Response shown when a user has successfully updated its account
+      type: object
+      example: {
+          "code": 201,
+          "result": "success",
+          "data": {
+              "id": 2,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pionaxel@gmail.com",
+              "created_at": "2022-12-27T13:45:20.311Z",
+              "updated_at": "2022-12-29T18:33:45.185Z",
+              "role": {
+                  "id": 1,
+                  "label": "ROLE_USER"
+              }
+          }
+      }
+    UserDeleteSuccess:
+      description: Response shown when a user has successfully delete its account
+      type: object
+      example: {
+        'code': 200,
+        'result': 'success',
+        'data': []
+      }
+    RoleNotFound:
+      description: Response shown when a role has not been found.
+      type: object
+      example: {
+          "code": 404,
+          "result": "error",
+          "message": "Role not found."
+      }
+    RolesSuccess:
+      description: Response shown when roles has been found.
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 1,
+            "label": "ROLE_USER"
+          },
+          {
+            "id": 2,
+            "label": "ROLE_ADMIN"
+          },
+          {
+            "id": 3,
+            "label": "ROLE_SUPER_ADMIN"
+          },
+          {
+            "id": 4,
+            "label": "ROLE_ORGANIZATION_OWNER"
+          },
+          {
+            "id": 5,
+            "label": "ROLE_ORGANIZATION_CO_OWNER"
+          },
+          {
+            "id": 6,
+            "label": "ROLE_ORGANIZATION_MEMBER"
+          },
+          {
+            "id": 7,
+            "label": "ROLE_TEAM_LEADER"
+          },
+          {
+            "id": 8,
+            "label": "ROLE_TEAM_MEMBER"
+          }
+        ]
+      }
+    RoleSuccess:
+      description: Response shown when a role has been found.
+      type: object
+      example: {
+          "code": 200,
+          "result": "success",
+          "data": {
+              "id": 1,
+              "label": "ROLE_USER"
+          }
+      }
+    RoleFormAdd:
+      description: Body request for Role creation
+      type: object
+      properties:
+        label:
+          type: string
+          default: ROLE_USER
+    RoleAddSuccess:
+      description: Response shown when a role has been successfully created.
+      type: object
+      example: {
+        'code': 200,
+        'result': 'success',
+        'data': {
+          "id": 1,
+          "label": "ROLE_USER"
+        }
+      }
+    RoleFormUpdate:
+      description: Body request for Role update
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 1
+        label:
+          type: string
+          default: "ROLE_ADMIN"
+    RoleDeleteSuccess:
+      description: Response shown when a role has been successfully deleted
+      type: object
+      example: {
+        'code': 200,
+        'result': 'success',
+        'data': []
+      }
+    OrganizationFormAdd:
+      description: Body request for organization creation
+      type: object
+      properties:
+        label:
+          type: string
+          default: Your organization's name
+        description:
+          type: string
+          default: Your organization's description
+    OrganizationFormUpdate:
+      description: Body request for organization update
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 1
+        label:
+          type: string
+          default: Your organization's name
+        description:
+          type: string
+          default: Your organization's description
+    OrganizationsSuccess:
+      description: Response shown when organizations have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 1,
+            "label": "Evoli",
+            "description": "Blablou",
+            "created_at": "2022-12-27T13:45:55.234Z",
+            "updated_at": "2022-12-27T13:45:55.234Z",
+            "projects": [
+              {
+                "id": 1,
+                "label": "Evoluer en Mentali"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "label": "Aquali",
+            "description": "Blablou",
+            "created_at": "2022-12-28T13:58:04.810Z",
+            "updated_at": "2022-12-28T13:58:04.810Z",
+            "projects": "null"
+          },
+        ]
+      }
+    OrganizationSuccess:
+      description: Response shown when an organization has been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "label": "Evoli",
+          "description": "Blablou",
+          "created_at": "2022-12-27T13:45:55.234Z",
+          "updated_at": "2022-12-27T13:45:55.234Z",
+          "projects": [
+            {
+              "id": 1,
+              "label": "Evoluer en Mentali"
+            }
+          ]
+        }
+      }
+    OrganizationAddSuccess:
+      description: Response shown when an organization has been successfully created
+      type: object
+      example: {
+        'code': 201,
+        'result': 'success',
+        'data': {
+          'id': 1,
+          'label': 'Evoli',
+          'description': 'Blablou',
+          'created_at': '2022-12-27T13:45:55.234Z',
+          'updated_at': '2022-12-27T13:45:55.234Z',
+          'projects': 'null'
+        }
+      }
+    OrganizationDeleteSuccess:
+      description: Response shown when an organization has been successfully deleted
+      type: object
+      example: {
+        'code': 200,
+        'result': 'success',
+        'data': []
+      }
+    OrganizationNotFound:
+      description: Response shown when an organization has not been found
+      type: object
+      example: {
+        'code': 404,
+        'result': 'error',
+        'message': 'Organization not found.'
+      }
+    UserOrganizationFormAdd:
+      description: Body request for UserOrganization creation
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserOrganizationUsersProperty'
+        organization:
+          type: integer
+          default: 1
+    UserOrganizationFormUpdate:
+      description: Body request for UserOrganization creation
+      type: object
+      properties:
+        user:
+          type: string
+          default: "test@gmail.com"
+        organization:
+          type: integer
+          default: 1
+        role:
+          type: integer
+          default: 6
+    UserOrganizationsSuccess:
+      description: Response shown when user_organizations have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 1,
+            "organization": {
+              "id": 1,
+              "label": "Evoli"
+            },
+            "users": [
+              {
+                "id": 2,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pionaxel@gmail.com",
+                "role": {
+                  "id": 4,
+                  "label": "ROLE_ORGANIZATION_OWNER"
+                }
+              },
+              {
+                "id": 3,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "test@gmail.com",
+                "role": {
+                  "id": 6,
+                  "label": "ROLE_ORGANIZATION_MEMBER"
+                }
+              },
+              {
+                "id": 4,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pouet@gmail.com",
+                "role": {
+                  "id": 5,
+                  "label": "ROLE_ORGANIZATION_CO_OWNER"
+                }
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "organization": {
+              "id": 2,
+              "label": "Aquali"
+            },
+            "users": [
+              {
+                "id": 2,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pionaxel@gmail.com",
+                "role": {
+                  "id": 4,
+                  "label": "ROLE_ORGANIZATION_OWNER"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    UserOrganizationSuccess:
+      description: Response shown when an user_organization has been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "organization": {
+            "id": 1,
+            "label": "MaengdokOrga"
+          },
+          "user": {
+            "id": 2,
+            "firstname": "Axel",
+            "lastname": "Pion",
+            "email": "pionaxel@gmail.com",
+            "role": {
+              "id": 4,
+              "label": "ROLE_ORGANIZATION_OWNER"
+            }
+          }
+        }
+      }
+    OrganizationMembersSuccess:
+      description: Response shown when members of an organization have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "organization": {
+              "id": 1,
+              "label": "Evoli"
+            }
+          },
+          {
+            "users": [
+              {
+                "id": 2,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pionaxel@gmail.com",
+                "role": {
+                  "id": 4,
+                  "label": "ROLE_ORGANIZATION_OWNER"
+                }
+              },
+              {
+                "id": 3,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "test@gmail.com",
+                "role": {
+                  "id": 6,
+                  "label": "ROLE_ORGANIZATION_MEMBER"
+                }
+              },
+              {
+                "id": 4,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pouet@gmail.com",
+                "role": {
+                  "id": 5,
+                  "label": "ROLE_ORGANIZATION_CO_OWNER"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    UserOrganizationAddSuccess:
+      description: Response shown when users have been successfully added to an organization
+      type: object
+      example: {
+        "code": 201,
+        "result": "success",
+        "data": {
+          "id": 3,
+          "organization": {
+            "id": 1,
+            "label": "Evoli"
+          },
+          "users": [
+            {
+              "id": 2,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pionaxel@gmail.com",
+              "role": {
+                "id": 4,
+                "label": "ROLE_ORGANIZATION_OWNER"
+              }
+            },
+            {
+              "id": 3,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "test@gmail.com",
+              "role": {
+                "id": 6,
+                "label": "ROLE_ORGANIZATION_MEMBER"
+              }
+            },
+            {
+              "id": 4,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pouet@gmail.com",
+              "role": {
+                "id": 5,
+                "label": "ROLE_ORGANIZATION_CO_OWNER"
+              }
+            }
+          ]
+        }
+      }
+    UserOrganizationDeleteSuccess:
+      description: Response shown when a user has been successfully removed from an organization
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [ ]
+      }
+    UserOrganizationNotFound:
+      description: Response shown when a user has not been found from a user_organization
+      type: object
+      example: {
+        "code": 404,
+        "result": "error",
+        'message': 'User Organization not found.'
+      }
+    UserInOrganizationNotFound:
+      description: Response shown when a user has not been found from in organization
+      type: object
+      example: {
+        "code": 404,
+        "result": "error",
+        "message": "The User is not present in this Organization."
+      }
+    UserOrganizationForbidden:
+      description: Response shown when a user tries to invite himself in its organization
+      type: object
+      example: {
+        'code': 403,
+        'result': 'error',
+        'message': 'Can not invite yourself.'
+      }
+    UserOrganizationUsersProperty:
+      description: Example of users array that should be sent with the body in /user-organization/add
+      type: object
+      example: {
+        "email": "test@gmail.com",
+        "role": 6
+      }
+    TeamsSuccess:
+      description: Response shown when Teams have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 1,
+            "label": "TeamEevolution",
+            "description": "Eevee lovers",
+            "organization": {
+              "id": 1,
+              "label": "Evoli"
+            },
+            "users": [],
+            "created_at": "2022-12-31T04:04:34.628Z",
+            "updated_at": "2022-12-31T04:04:34.628Z"
+          }
+        ]
+      }
+    TeamSuccess:
+      description: Response shown when a Team has been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "label": "TeamEevolution",
+          "description": "Eevee lovers",
+          "organization": {
+            "id": 1,
+            "label": "Evoli"
+          },
+          "users": [ ],
+          "created_at": "2022-12-31T04:04:34.628Z",
+          "updated_at": "2022-12-31T04:04:34.628Z"
+        }
+      }
+    TeamNotFound:
+      description: Response shown when a Team has not been found
+      type: object
+      example: {
+        "code": 404,
+        "result": "Not Found",
+        "data": {
+          "errors": [
+            {
+              "code": 0,
+              "input": "id",
+              "message": "Team with id: 2 not found"
+            }
+          ]
+        }
+      }
+    TeamFormAdd:
+      description: Body request for Team creation
+      type: object
+      properties:
+        label:
+          type: string
+          default: "TeamEevolution"
+        description:
+          type: string
+          default: "Eevee lovers"
+        organization:
+          type: integer
+          default: 1
+    TeamAddSuccess:
+      description: Response shown when a Team has been successfully created
+      type: object
+      example: {
+        "code": 201,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "label": "TeamEevolution",
+          "description": "Eevee lovers",
+          "organization": {
+            "id": 1,
+            "label": "Evoli"
+          },
+          "users": [ ],
+          "created_at": "2022-12-31T04:04:34.628Z",
+          "updated_at": "2022-12-31T04:04:34.628Z"
+        }
+      }
+    TeamFormUpdate:
+      description: Body request for Team update
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 1
+        label:
+          type: string
+          default: "TeamEevolution"
+        description:
+          type: string
+          default: "Let's have a team full of Eevolutions"
+        organization:
+          type: integer
+          default: 1
+    TeamUpdateSuccess:
+      description: Response shown when a Team has been successfully updated
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "label": "TeamEevolution",
+          "description": "Let's have a team full of Eevolutions",
+          "organization": {
+            "id": 1,
+            "label": "Evoli"
+          },
+          "users": [ ],
+          "created_at": "2022-12-31T04:04:34.628Z",
+          "updated_at": "2022-12-31T04:25:21.054Z"
+        }
+      }
+    TeamDeleteSuccess:
+      description: Response shown when a Team has been successfully deleted
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [ ]
+      }
+    UserTeamFormAdd:
+      description: Body request to add a User in a Team
+      type: object
+      properties:
+        team_id:
+          type: integer
+          default: 1
+        user_id:
+          type: integer
+          default: 1
+        role_id:
+          type: integer
+          default: 8
+    UserTeamAddSuccess:
+      description: Response shown when a User is successfully added to a Team
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "user": 1,
+          "team": 1,
+          "role": {
+            "id": 8,
+            "label": "ROLE_TEAM_MEMBER"
+          }
+        }
+      }
+    UserTeamUserAlreadyExists:
+      description: Response shown when a User has already been added to a Team
+      type: object
+      example: {
+        "code": 405,
+        "result": "Not allowed",
+        "data": {
+          "errors": [
+            {
+              "code": 0,
+              "input": "user",
+              "message": "This user already exists in this team"
+            }
+          ]
+        }
+      }
+    UserTeamFormUpdate:
+      description: Body request to update a User's Role in a Team
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 1
+        role_id:
+          type: integer
+          default: 7
+    UserTeamNotFound:
+      description: Response shown when a UserTeam has not been found
+      type: object
+      example: {
+        "code": 404,
+        "result": "Not Found",
+        "data": {
+          "errors": [
+            {
+              "code": 0,
+              "input": "id",
+              "message": "This user not found in this team"
+            }
+          ]
+        }
+      }
+    ProjectsSuccess:
+      description: Response shown when Projects have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 2,
+            "label": "Freefall",
+            "description": "meh...",
+            "created_at": "2022-12-25T17:23:09.184Z",
+            "updated_at": "2022-12-25T17:23:09.184Z",
+            "organization": 1,
+            "team": "null"
+          },
+          {
+            "id": 3,
+            "label": "Sempiternal",
+            "description": "meh...",
+            "created_at": "2022-12-25T17:31:34.210Z",
+            "updated_at": "2022-12-25T17:31:34.210Z",
+            "organization": 1,
+            "team": "null"
+          },
+        ]
+      }
+    ProjectSuccess:
+      description: Response shown when a Project has been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 3,
+          "label": "Sempiternal",
+          "description": "meh...",
+          "created_at": "2022-12-25T17:31:34.210Z",
+          "updated_at": "2022-12-25T17:31:34.210Z",
+          "organization": 1,
+          "team": "null"
+        }
+      }
+    ProjectFormAdd:
+      description: Body request for Project creation
+      type: object
+      properties:
+        label:
+          type: string
+          default: 팻두
+        description:
+          type: string
+          default: 죽은 친구와의 전화
+        organization:
+          type: integer
+          default: 1
+        team:
+          type: integer
+    ProjectAddSuccess:
+      description: Response shown when a Project has been successfully created
+      type: object
+      example: {
+        "code": 201,
+        "result": "success",
+        "project": {
+          "id": 1,
+          "label": "팻두",
+          "description": "죽은 친구와의 전화",
+          "created_at": "2022-12-27T13:46:53.423Z",
+          "updated_at": "2022-12-27T13:46:53.423Z",
+          "organization": 1,
+          "team": "null"
+        }
+      }
+    ProjectFormUpdate:
+      description: Body request for Project creation
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 1
+        label:
+          type: string
+          default: 팻두
+        description:
+          type: string
+          default: 죽은 친구와의 전화
+        organization:
+          type: integer
+          default: 1
+        team:
+          type: integer
+    TaskProjectTasksSuccess:
+      description: Response shown when a Project's Tasks have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 1,
+            "label": "반짝이는 별이 됐지",
+            "description": "",
+            "provisional_start": "2022-12-26T17:00:00Z",
+            "provisional_end": "2022-12-26T17:20:00Z",
+            "provisional_time": "00:20:00",
+            "is_billable": true,
+            "is_ended": false,
+            "project": {
+              "id": 2,
+              "label": "Freefall"
+            },
+            "created_at": "2022-12-26T11:10:43.614Z",
+            "updated_at": "2022-12-26T11:10:43.614Z"
+          },
+          {
+            "id": 2,
+            "label": "어제의 너를 기억헤",
+            "description": "",
+            "provisional_start": "2022-12-26T17:00:00Z",
+            "provisional_end": "2022-12-26T17:20:00Z",
+            "provisional_time": "00:20:00",
+            "is_billable": true,
+            "is_ended": false,
+            "project": {
+              "id": 2,
+              "label": "Freefall"
+            },
+            "created_at": "2022-12-26T11:23:15.433Z",
+            "updated_at": "2022-12-26T11:23:15.433Z"
+          }
+        ]
+      }
+    TaskSuccess:
+      description: Response shown when a Task has been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 3,
+          "label": "Tie a cherry",
+          "description": "믿지 못 할 것들 다, 눈이 부셔 못보다",
+          "provisional_start": "2022-12-26T17:00:00Z",
+          "provisional_end": "2022-12-26T17:20:00Z",
+          "provisional_time": "00:20:00",
+          "is_billable": true,
+          "is_ended": false,
+          "project": {
+            "id": 2,
+            "label": "Freefall"
+          },
+          "created_at": "2022-12-26T11:23:16.391Z",
+          "updated_at": "2022-12-26T11:23:16.391Z"
+        }
+      }
+    TaskFormAdd:
+      description: Body request for Task creation
+      type: object
+      properties:
+        label:
+          type: string
+          default: Tie a cherry
+        description:
+          type: string
+          default: 믿지 못 할 것들 다, 눈이 부셔 못보다
+        provisional_start:
+          type: string
+          default: "2022-12-26T17:00:00"
+        provisional_end:
+          type: string
+          default: "2022-12-26T17:20:00"
+        provisional_time:
+          type: string
+          default: 00:20:00
+        is_billable:
+          type: boolean
+          default: True
+        is_ended:
+          type: boolean
+          default: False
+        project:
+          type: integer
+          default: 1
+    TaskAddSuccess:
+      description: Response shown when a Task has been successfully created
+      type: object
+      example: {
+        "code": 201,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "label": "Tie a cherry",
+          "description": "믿지 못 할 것들 다, 눈이 부셔 못보다",
+          "provisional_start": "2022-12-26T17:00:00Z",
+          "provisional_end": "2022-12-26T17:20:00Z",
+          "provisional_time": "00:20:00",
+          "is_billable": true,
+          "is_ended": false,
+          "project": {
+            "id": 1,
+            "label": "Freefall"
+          },
+          "created_at": "2022-12-27T13:58:59.728Z",
+          "updated_at": "2022-12-27T13:58:59.728Z"
+        }
+      }
+    TaskFormUpdate:
+      description: Body request for Task update
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 1
+        label:
+          type: string
+          default: Tie a cherry
+        description:
+          type: string
+          default: 믿지 못 할 것들 다, 눈이 부셔 못보다
+        provisional_start:
+          type: string
+          default: "2022-12-26T17:00:00"
+        provisional_end:
+          type: string
+          default: "2022-12-26T17:20:00"
+        provisional_time:
+          type: string
+          default: 00:20:00
+        is_billable:
+          type: boolean
+          default: True
+        is_ended:
+          type: boolean
+          default: False
+        project:
+          type: integer
+          default: 1
+    UserTasksSuccess:
+      description: Response shown when User's Tasks have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "id": 1,
+            "task": {
+              "id": 1,
+              "label": "쏟아져 불덩이가 이름이 궁금해 다"
+            },
+            "user": {
+              "id": 2,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pionaxel@gmail.com"
+            }
+          },
+          {
+            "id": 2,
+            "task": {
+              "id": 2,
+              "label": "발을 담기도 전에 이겨버렸지"
+            },
+            "user": {
+              "id": 2,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pionaxel@gmail.com"
+            }
+          }
+        ]
+      }
+    UserTaskSuccess:
+      description: Response shown when a User's Task has been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": {
+          "id": 1,
+          "task": {
+            "id": 1,
+            "label": "쏟아져 불덩이가 이름이 궁금해 다"
+          },
+          "user": {
+            "id": 2,
+            "firstname": "Axel",
+            "lastname": "Pion",
+            "email": "pionaxel@gmail.com"
+          }
+        }
+      }
+    UsersTaskSuccess:
+      description: Response shown when all Users on a Task have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [
+          {
+            "task": {
+              "id": 1,
+              "label": "Prendre des niveaux"
+            }
+          },
+          {
+            "users": [
+              {
+                "id": 2,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pionaxel@gmail.com"
+              },
+              {
+                "id": 4,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "pouet@gmail.com"
+              },
+              {
+                "id": 3,
+                "firstname": "Axel",
+                "lastname": "Pion",
+                "email": "test@gmail.com"
+              }
+            ]
+          }
+        ]
+      }
+    UserTaskFormAdd:
+      description: Body request to assign Users to a Task
+      type: object
+      example: {
+        "users": [
+          "pouet@gmail.com",
+          "test@gmail.com"
+        ],
+        "organization": 1,
+        "task": 1
+      }
+    UserTaskAddSuccess:
+      description: Response shown when Users have been successfully assigned to a Task
+      type: object
+      example: {
+        "code": 201,
+        "result": "success",
+        "data": {
+          "id": 4,
+          "task": {
+            "id": 1,
+            "label": "Sadness and Sorrow"
+          },
+          "user": [
+            {
+              "id": 2,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pionaxel@gmail.com"
+            },
+            {
+              "id": 4,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "pouet@gmail.com"
+            },
+            {
+              "id": 3,
+              "firstname": "Axel",
+              "lastname": "Pion",
+              "email": "test@gmail.com"
+            }
+          ]
+        }
+      }
+    UserTaskFormDelete:
+      description: Body request to remove a User from a Task
+      type: object
+      properties:
+        user:
+          type: string
+          default: "test@gmail.com"
+        organization:
+          type: integer
+          default: 1
+        task:
+          type: integer
+          default: 1
+    TaskTimersSuccess:
+      description: Response shown when all Task's timers have been successfully fetched
+      type: object
+      example: {
+        "code": 200,
+        "result": "success",
+        "data": [ ]
+      }
+    TaskTimerStartSuccess:
+      description: Response shown when a TaskTimer has been successfully created
+      type: object
+      example: {
+        'message': 'Task time successfully started'
+      }

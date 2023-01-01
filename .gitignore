@@ -1,6 +1,8 @@
+venv/
 .idea/
 .env
 .DS_Store
 **/migrations/**
 !**/migrations
 !**/migrations/__init__.py
+.vscode
