@@ -217,7 +217,7 @@ def add_task(request):
 
 @csrf_exempt
 def update_task(request):
-    if request.method != 'PATCH':
+    if request.method != 'PUT':
         return JsonResponse({
             'code': settings.HTTP_CONSTANTS['NOT_ALLOWED'],
             'result': 'Not Allowed',

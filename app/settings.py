@@ -66,9 +66,19 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
+    "http://127.31.0.1:3000",
+    "http://172.31.0.1:3000",
     "http://localhost:3000"
 ]
 
+CORS_ORIGIN_WHITELIST = [
+    "http://127.0.0.1:3000",
+    "http://172.31.0.1:3000",
+    "http://localhost:3000"
+]
+
+CORS_ALLOW_HEADERS = [    'Authorization',    'Content-Type',"*"]
+CORS_ALLOW_METHODS = [    'GET',    'POST',    'PUT', 'PATCH' ,  'DELETE',    'OPTIONS',]   
 ROOT_URLCONF = 'app.urls'
 
 TEMPLATES = [

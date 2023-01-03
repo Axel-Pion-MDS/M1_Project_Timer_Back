@@ -101,7 +101,7 @@ def get_user(request, user_id):
             'result': 'Not Allowed',
             'message': 'Must be a GET method',
         })
-
+    
     try:
         authorization = request.headers.get('Authorization')
         jwt_content = tokenDecode.decode_token(authorization)
